@@ -27,7 +27,7 @@ class LiveStreamRecorder:
         self.recording_info = recording_info
         self.subprocess_start_info = app.subprocess_start_up_info
 
-        self.user_config = self.settings.user_config
+        self.default_config = self.settings.default_config
         self.account_config = self.settings.accounts_config
         self.platform_key = self._get_info("platform_key")
         self.cookies = self.settings.cookies_config.get(self.platform_key)
@@ -54,16 +54,16 @@ class LiveStreamRecorder:
         return self.recording_info.get(key, default) or default
 
     def is_use_proxy(self):
-        default_proxy_platform = self.user_config.get("default_platform_with_proxy", "")
+        default_proxy_platform = self.default_config.get("default_platform_with_proxy", "")
         proxy_list = default_proxy_platform.replace("，", ",").replace(" ", "").split(",")
-        if self.user_config.get("enable_proxy") and self.platform_key in proxy_list:
-            self.proxy = self.user_config.get("proxy_address")
+        if self.default_config.get("enable_proxy") and self.platform_key in proxy_list:
+            self.proxy = self.default_config.get("proxy_address")
             return self.proxy
 
     def _get_filename(self, stream_info: StreamData) -> str:
         live_title = None
         stream_info.title = utils.clean_name(stream_info.title, None)
-        if self.user_config.get("filename_includes_title") and stream_info.title:
+        if self.default_config.get("filename_includes_title") and stream_info.title:
             stream_info.title = self._clean_and_truncate_title(stream_info.title)
             live_title = stream_info.title
 
@@ -77,7 +77,7 @@ class LiveStreamRecorder:
         return full_filename
 
     def _get_output_dir(self, stream_info: StreamData) -> str:
-        if self.recording.recording_dir and self.user_config.get("folder_name_time"):
+        if self.recording.recording_dir and self.default_config.get("folder_name_time"):
             current_date = datetime.today().strftime("%Y-%m-%d")
             if current_date not in self.recording.recording_dir:
                 self.recording.recording_dir = None
@@ -87,15 +87,15 @@ class LiveStreamRecorder:
 
         now = datetime.today().strftime("%Y-%m-%d_%H-%M-%S")
         output_dir = self.output_dir.rstrip("/").rstrip("\\")
-        if self.user_config.get("folder_name_platform"):
+        if self.default_config.get("folder_name_platform"):
             output_dir = os.path.join(output_dir, stream_info.platform)
-        if self.user_config.get("folder_name_author"):
+        if self.default_config.get("folder_name_author"):
             output_dir = os.path.join(output_dir, stream_info.anchor_name)
-        if self.user_config.get("folder_name_time"):
+        if self.default_config.get("folder_name_time"):
             output_dir = os.path.join(output_dir, now[:10])
-        if self.user_config.get("folder_name_title") and stream_info.title:
+        if self.default_config.get("folder_name_title") and stream_info.title:
             live_title = self._clean_and_truncate_title(stream_info.title)
-            if self.user_config.get("folder_name_time"):
+            if self.default_config.get("folder_name_time"):
                 output_dir = os.path.join(output_dir, f"{live_title}_{stream_info.anchor_name}")
             else:
                 output_dir = os.path.join(output_dir, f"{now[:10]}_{live_title}")
@@ -121,7 +121,7 @@ class LiveStreamRecorder:
         http_record_list = ["shopee"]
         if self.platform_key in http_record_list:
             url = url.replace("https://", "http://")
-        if self.user_config.get("force_https_recording") and url.startswith("http://"):
+        if self.default_config.get("force_https_recording") and url.startswith("http://"):
             url = url.replace("http://", "https://")
         return url
 
@@ -173,7 +173,7 @@ class LiveStreamRecorder:
             stream_info.record_url,
             ffmpeg_command,
             self.save_format,
-            self.user_config.get("custom_script_command")
+            self.default_config.get("custom_script_command")
         )
 
     async def start_ffmpeg(
@@ -276,7 +276,7 @@ class LiveStreamRecorder:
                 except Exception as e:
                     logger.debug(f"Failed to update UI: {e}")
 
-                if self.user_config.get("convert_to_mp4") and self.save_format == "ts":
+                if self.default_config.get("convert_to_mp4") and self.save_format == "ts":
                     if self.segment_record:
                         file_paths = utils.get_file_paths(os.path.dirname(save_file_path))
                         prefix = os.path.basename(save_file_path).rsplit("_", maxsplit=1)[0]
@@ -284,21 +284,21 @@ class LiveStreamRecorder:
                             if prefix in path:
                                 try:
                                     self.app.page.run_task(
-                                        self.converts_mp4, path, self.user_config["delete_original"]
+                                        self.converts_mp4, path, self.default_config["delete_original"]
                                     )
                                 except Exception as e:
                                     logger.error(f"Failed to convert video: {e}")
-                                    await self.converts_mp4(path, self.user_config["delete_original"])
+                                    await self.converts_mp4(path, self.default_config["delete_original"])
                     else:
                         try:
                             self.app.page.run_task(
-                                self.converts_mp4, save_file_path, self.user_config["delete_original"]
+                                self.converts_mp4, save_file_path, self.default_config["delete_original"]
                             )
                         except Exception as e:
                             logger.error(f"Failed to convert video: {e}")
-                            await self.converts_mp4(save_file_path, self.user_config["delete_original"])
+                            await self.converts_mp4(save_file_path, self.default_config["delete_original"])
 
-                if self.user_config.get("execute_custom_script") and script_command:
+                if self.default_config.get("execute_custom_script") and script_command:
                     logger.info("Prepare a direct script in the background")
                     try:
                         self.app.page.run_task(
@@ -308,7 +308,7 @@ class LiveStreamRecorder:
                             save_file_path,
                             save_type,
                             self.segment_record,
-                            self.user_config.get("convert_to_mp4")
+                            self.default_config.get("convert_to_mp4")
                         )
                         logger.success("Successfully added script execution")
                     except Exception as e:
@@ -319,8 +319,26 @@ class LiveStreamRecorder:
                             save_file_path,
                             save_type,
                             self.segment_record,
-                            self.user_config.get("convert_to_mp4")
+                            self.default_config.get("convert_to_mp4")
                         )
+
+                # 语音识别处理
+                if self.default_config.get("speech_recognition_enabled") and self.default_config.get("speech_recognition_auto_process"):
+                    try:
+                        # 延迟执行，等待转码和文件操作完成
+                        delay_time = 10 if self.default_config.get("convert_to_mp4") else 3
+                        
+                        # 如果是分段录制，处理所有分段文件
+                        if self.segment_record:
+                            # 延迟后再查找文件，确保转码完成
+                            self.app.page.run_task(self.process_speech_recognition_delayed, save_file_path, delay_time, True)
+                        else:
+                            # 处理单个文件
+                            self.app.page.run_task(self.process_speech_recognition_delayed, save_file_path, delay_time, False)
+                        
+                        logger.info("语音识别任务已启动")
+                    except Exception as e:
+                        logger.error(f"启动语音识别失败: {e}")
 
         except Exception as e:
             logger.error(f"An error occurred during the subprocess execution: {e}")
@@ -470,6 +488,96 @@ class LiveStreamRecorder:
             logger.error("Please add `#!/bin/bash` at the beginning of your bash script file.")
         except Exception as e:
             logger.error(f"An error occurred: {e}")
+
+    async def process_speech_recognition_delayed(self, save_file_path: str, delay_time: int, is_segment: bool) -> None:
+        """
+        延迟处理语音识别，等待转码完成
+        
+        Args:
+            save_file_path: 原始保存路径
+            delay_time: 延迟时间（秒）
+            is_segment: 是否为分段录制
+        """
+        try:
+            # 等待文件操作完成
+            await asyncio.sleep(delay_time)
+            
+            if is_segment:
+                # 分段录制：查找所有相关文件
+                save_dir = os.path.normpath(os.path.dirname(save_file_path))
+                file_paths = utils.get_file_paths(save_dir)
+                prefix = os.path.basename(save_file_path).rsplit("_", maxsplit=1)[0]
+                
+                for path in file_paths:
+                    normalized_path = os.path.normpath(path)
+                    if prefix in os.path.basename(normalized_path) and os.path.exists(normalized_path):
+                        # 优先使用mp4文件
+                        if self.default_config.get("convert_to_mp4") and normalized_path.endswith('.ts'):
+                            mp4_path = os.path.splitext(normalized_path)[0] + ".mp4"
+                            if os.path.exists(mp4_path):
+                                normalized_path = mp4_path
+                        
+                        if os.path.exists(normalized_path):
+                            await self.process_speech_recognition(normalized_path)
+            else:
+                # 单个文件
+                final_file_path = os.path.normpath(save_file_path)
+                
+                # 如果启用了转码，优先使用转码后的mp4文件
+                if self.default_config.get("convert_to_mp4") and self.save_format == "ts":
+                    mp4_path = os.path.splitext(final_file_path)[0] + ".mp4"
+                    if os.path.exists(mp4_path):
+                        final_file_path = mp4_path
+                
+                if os.path.exists(final_file_path):
+                    await self.process_speech_recognition(final_file_path)
+                else:
+                    logger.warning(f"语音识别：文件不存在 {final_file_path}")
+                    
+        except Exception as e:
+            logger.error(f"延迟语音识别处理失败: {e}")
+
+    async def process_speech_recognition(self, video_file_path: str) -> None:
+        """
+        处理视频文件的语音识别
+        
+        Args:
+            video_file_path: 视频文件路径
+        """
+        try:
+            # 检查语音识别管理器是否已初始化
+            if not hasattr(self.app, 'speech_recognition_manager'):
+                from .speech_recognition import SpeechRecognitionManager
+                self.app.speech_recognition_manager = SpeechRecognitionManager(self.app)
+            
+            # 延迟执行，等待文件写入完成
+            await asyncio.sleep(2)
+            
+            if not self.app.recording_enabled:
+                logger.info(f"Application is closing, adding speech recognition task to background service: {video_file_path}")
+                BackgroundService.get_instance().add_task(
+                    self.process_speech_recognition_sync, video_file_path
+                )
+                return
+            
+            # 正常执行语音识别
+            success = await self.app.speech_recognition_manager.recognize_and_save_subtitle(video_file_path)
+            if success:
+                logger.success(f"语音识别完成: {video_file_path}")
+            else:
+                logger.warning(f"语音识别失败或跳过: {video_file_path}")
+                
+        except Exception as e:
+            logger.error(f"语音识别处理异常: {e}")
+
+    def process_speech_recognition_sync(self, video_file_path: str) -> None:
+        """同步版本的语音识别处理方法，用于后台服务"""
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            loop.run_until_complete(self.process_speech_recognition(video_file_path))
+        finally:
+            loop.close()
 
     @staticmethod
     def get_headers_params(live_url, platform_key):

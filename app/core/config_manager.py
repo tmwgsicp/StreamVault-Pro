@@ -13,7 +13,6 @@ class ConfigManager:
         self.config_path = os.path.join(run_path, "config")
         self.language_config_path = os.path.join(self.config_path, "language.json")
         self.default_config_path = os.path.join(self.config_path, "default_settings.json")
-        self.user_config_path = os.path.join(self.config_path, "user_settings.json")
         self.cookies_config_path = os.path.join(self.config_path, "cookies.json")
         self.about_config_path = os.path.join(self.config_path, "version.json")
         self.recordings_config_path = os.path.join(self.config_path, "recordings.json")
@@ -24,7 +23,6 @@ class ConfigManager:
 
     def init(self):
         self.init_default_config()
-        self.init_user_config()
         self.init_cookies_config()
         self.init_accounts_config()
         self.init_recordings_config()
@@ -45,11 +43,6 @@ class ConfigManager:
     def init_default_config(self):
         default_config = {}
         self._init_config(self.default_config_path, default_config)
-
-    def init_user_config(self):
-        if os.path.exists(self.user_config_path) and self.load_user_config():
-            return
-        shutil.copy(self.default_config_path, self.user_config_path)
 
     def init_cookies_config(self):
         cookies_config = {}
@@ -83,7 +76,8 @@ class ConfigManager:
         return self._load_config(self.default_config_path, "An error occurred while loading default config")
 
     def load_user_config(self):
-        return self._load_config(self.user_config_path, "An error occurred while loading user config")
+        """为了兼容性保留此方法，但实际返回default config"""
+        return self.load_default_config()
 
     def load_recordings_config(self):
         return self._load_config(self.recordings_config_path, "An error occurred while loading recordings config")
@@ -131,8 +125,9 @@ class ConfigManager:
         )
 
     async def save_user_config(self, config):
+        """保存用户配置到default_settings.json"""
         await self._save_config(
-            self.user_config_path,
+            self.default_config_path,
             config,
             success_message="User configuration saved.",
             error_message="An error occurred while saving user config",
@@ -147,6 +142,6 @@ class ConfigManager:
         )
 
     def get_config_value(self, key: str, default: Any = None):
-        user_config = self.load_user_config()
-        default_config = self.load_default_config()
-        return user_config.get(key, default_config.get(key, default))
+        """获取配置值，统一从default_settings.json读取"""
+        config = self.load_default_config()
+        return config.get(key, default)

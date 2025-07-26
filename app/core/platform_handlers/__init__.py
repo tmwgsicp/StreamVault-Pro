@@ -131,6 +131,10 @@ def get_platform_info(record_url: str) -> tuple:
 
 
 __all__ = [
+    "get_platform_handler",
+    "get_platform_info",
+    "PlatformHandler",
+    "StreamData",
     "AcfunHandler",
     "BaiduHandler",
     "BigoHandler",
@@ -157,7 +161,6 @@ __all__ = [
     "NeteaseHandler",
     "PamdaTVHandler",
     "PiaopiaoHandler",
-    "PlatformHandler",
     "PopkonTVHandler",
     "QiandureboHandler",
     "RedNoteHandler",
@@ -165,7 +168,6 @@ __all__ = [
     "ShowRoomHandlerHandler",
     "SixRoomHandler",
     "SoopHandler",
-    "StreamData",
     "TaobaoHandler",
     "TikTokHandler",
     "TwitcastingHandler",
@@ -173,11 +175,9 @@ __all__ = [
     "VVXQHandler",
     "WeiboHandler",
     "WinkTVHandler",
-    "YYHandler",
     "YinboHandler",
     "YiqiLiveHandler",
     "YoutubeHandler",
+    "YYHandler",
     "ZhihuHandler",
-    "get_platform_handler",
-    "get_platform_info",
 ]

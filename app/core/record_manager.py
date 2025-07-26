@@ -50,7 +50,7 @@ class RecordingManager:
 
     def initialize_dynamic_state(self):
         """Initialize dynamic state for all recordings."""
-        loop_time_seconds = self.settings.user_config.get("loop_time_seconds")
+        loop_time_seconds = self.settings.default_config.get("loop_time_seconds")
         self.loop_time_seconds = int(loop_time_seconds or 300)
         for recording in self.recordings:
             recording.loop_time_seconds = self.loop_time_seconds
@@ -223,7 +223,7 @@ class RecordingManager:
             recording.is_checking = True
             platform, platform_key = get_platform_info(recording.url)
 
-            if self.settings.user_config["language"] != "zh_CN":
+            if self.settings.default_config["language"] != "zh_CN":
                 platform = platform_key
 
             output_dir = self.settings.get_video_save_path()
@@ -254,7 +254,7 @@ class RecordingManager:
                 recording.status_info = RecordingStatus.LIVE_STATUS_CHECK_ERROR
                 return
 
-            if self.settings.user_config.get("remove_emojis"):
+            if self.settings.default_config.get("remove_emojis"):
                 stream_info.anchor_name = utils.clean_name(stream_info.anchor_name, self._["live_room"])
 
             recording.is_live = stream_info.is_live
@@ -267,9 +267,9 @@ class RecordingManager:
                 recording.title = f"{recording.streamer_name} - {self._[recording.quality]}"
                 recording.display_title = f"[{self._['is_live']}] {recording.title}"
 
-                if self.settings.user_config["stream_start_notification_enabled"] or recording.enabled_message_push:
+                if self.settings.default_config["stream_start_notification_enabled"] or recording.enabled_message_push:
                     push_content = self._["push_content"]
-                    begin_push_message_text = self.settings.user_config.get("custom_stream_start_content")
+                    begin_push_message_text = self.settings.default_config.get("custom_stream_start_content")
                     if begin_push_message_text:
                         push_content = begin_push_message_text
 
@@ -277,14 +277,14 @@ class RecordingManager:
                     push_content = push_content.replace("[room_name]", recording.streamer_name).replace(
                         "[time]", push_at
                     )
-                    msg_title = self.settings.user_config.get("custom_notification_title").strip()
+                    msg_title = self.settings.default_config.get("custom_notification_title").strip()
                     msg_title = msg_title or self._["status_notify"]
 
                     msg_manager = MessagePusher(self.settings)
                     self.app.page.run_task(msg_manager.push_messages, msg_title, push_content)
 
-                    if self.settings.user_config.get("only_notify_no_record"):
-                        notify_loop_time = self.settings.user_config.get("notify_loop_time")
+                    if self.settings.default_config.get("only_notify_no_record"):
+                        notify_loop_time = self.settings.default_config.get("notify_loop_time")
                         recording.loop_time_seconds = int(notify_loop_time or 3600)
                         is_record = False
                     else:
@@ -360,7 +360,7 @@ class RecordingManager:
         await self.remove_recordings(recordings)
 
     async def check_free_space(self, output_dir: str | None = None):
-        disk_space_limit = float(self.settings.user_config.get("recording_space_threshold"))
+        disk_space_limit = float(self.settings.default_config.get("recording_space_threshold"))
         output_dir = output_dir or self.settings.get_video_save_path()
         if utils.check_disk_capacity(output_dir) < disk_space_limit:
             self.app.recording_enabled = False

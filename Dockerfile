@@ -1,42 +1,65 @@
-FROM python:3.12-slim AS builder
+# StreamVault Pro - Professional Live Stream Recording Platform
+# Multi-stage build for optimized image size
 
-WORKDIR /app
+FROM python:3.11-slim as builder
 
-# Install system dependencies for build
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
     build-essential \
-    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
-COPY requirements-web.txt .
-RUN pip install --no-cache-dir -r requirements-web.txt
+COPY requirements.txt /tmp/
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
-COPY . .
-RUN mkdir -p /app/logs /app/downloads
+# Production stage
+FROM python:3.11-slim
 
-# Final stage: production image
-FROM python:3.12-slim
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PLATFORM=web \
+    HOST=0.0.0.0 \
+    PORT=8080
 
-WORKDIR /app
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Install system dependencies and FFmpeg
+RUN apt-get update && apt-get install -y \
     ffmpeg \
-    tzdata \
     curl \
-    gnupg \
-    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y --no-install-recommends nodejs \
-    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Set timezone
-ENV TZ=Asia/Shanghai
-RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo "$TZ" > /etc/timezone
-
-# Copy Python dependencies and project files from the builder stage
-COPY --from=builder /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+# Copy Python packages from builder stage
+COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
 COPY --from=builder /usr/local/bin /usr/local/bin
-COPY --from=builder /app/ ./
 
-CMD ["sh", "-c", "python main.py --web --host 0.0.0.0"]
+# Create application directory and user
+RUN useradd --create-home --shell /bin/bash streamvault
+WORKDIR /home/streamvault/app
+USER streamvault
+
+# Copy application code
+COPY --chown=streamvault:streamvault . .
+
+# Create necessary directories
+RUN mkdir -p downloads config logs
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD curl -f http://localhost:8080 || exit 1
+
+# Expose port
+EXPOSE 8080
+
+# Set volume for persistent data
+VOLUME ["/home/streamvault/app/downloads", "/home/streamvault/app/config", "/home/streamvault/app/logs"]
+
+# Start command
+CMD ["python", "main.py", "--web", "--host", "0.0.0.0", "--port", "8080"]

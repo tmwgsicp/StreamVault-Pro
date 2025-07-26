@@ -94,9 +94,9 @@ class RecordingDialog:
             value=initial_values.get("recording_dir"),
         )
 
-        user_config = self.app.settings.user_config
-        segmented_recording_enabled = user_config.get('segmented_recording_enabled', False)
-        video_segment_time = user_config.get('video_segment_time', 1800)
+        default_config = self.app.settings.default_config
+        segmented_recording_enabled = default_config.get('segmented_recording_enabled', False)
+        video_segment_time = default_config.get('video_segment_time', 1800)
         segment_record = initial_values.get("segment_record", segmented_recording_enabled)
         segment_time = initial_values.get("segment_time", video_segment_time)
 

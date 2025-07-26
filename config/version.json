@@ -1,21 +1,66 @@
 {
   "introduction": {
-    "en": "A free application dedicated to recording videos from online live streaming platforms. By integrating FFmpeg, it efficiently and reliably records live streams from over 40 major platforms including Douyin, TikTok, Kuaishou, Huya, Douyu, Bilibili, Rednote, Baidu, Weibo, Kuwo, Twitch, YouTube, PandaTV, SoopLive, FlexTV, PopKontv, Twitcasting, WinkTV, 17Live, Acfun, CHZZK, and Shopee.",
-    "zh_CN": "一款专注于录制在线直播平台视频的免费应用。通过集成FFmpeg，高效、稳定地录制抖音、TikTok、快手、虎牙、斗鱼、B站、小红书、百度、微博、酷狗、Twitch、YouTube、PandaTV、SoopLive、FlexTV、PopKontv、Twitcasting、WinkTV、17Live、Acfun、CHZZK 和 Shopee 等40+主流平台的直播流。"
+    "en": "StreamVault Pro is a professional-grade live stream recording and management platform built upon the open-source StreamCap project. This enhanced version adds advanced features including intelligent transcript management, enterprise license system, modern UI design, and comprehensive platform support. By integrating FFmpeg and advanced stream processing technologies, it efficiently and reliably records live streams from over 40 major platforms including Douyin, TikTok, Kuaishou, Huya, Douyu, Bilibili, and more.\n\nDeveloped by: tmwgsicp | Original Author: ihmily",
+    "zh_CN": "StreamVault Pro是一款基于开源StreamCap项目构建的专业级直播流录制和管理平台。这个增强版本添加了高级功能，包括智能文案管理、企业许可证系统、现代化UI设计和全面的平台支持。通过集成FFmpeg和先进的流处理技术，高效、稳定地录制抖音、TikTok、快手、虎牙、斗鱼、B站等40+主流平台的直播流。\n\n开发者：tmwgsicp | 原作者：ihmily"
   },
   "open_source_license": "Apache License 2.0",
-  "version_updates": [
-    {
-      "version": "1.0.1",
-      "kernel_version": "4.0.5",
-      "updates": {
-        "en": [
-          "None"
-        ],
-        "zh_CN": [
-          "无"
-        ]
-      }
+  "commercial_license": "Available - Contact tmwgsicp@outlook.com",
+  "version": "2.0.0",
+  "build": "2025.01.01",
+  "project_name": "StreamVault Pro",
+  "project_url": "https://github.com/tmwgsicp/StreamVault-Pro",
+  "original_project_url": "https://github.com/ihmily/StreamCap",
+  "supported_platforms": {
+    "desktop": ["Windows", "macOS", "Linux"],
+    "web": ["Chrome", "Firefox", "Safari", "Edge"],
+    "docker": ["x86_64", "ARM64"]
+  },
+  "features": {
+    "core": [
+      "40+ Platform Support",
+      "Smart Monitoring",
+      "Multi-format Output",
+      "Auto Transcoding",
+      "High-quality Recording"
+    ],
+    "advanced": [
+      "Intelligent Transcript Management",
+      "Professional License System",
+      "Modern Interface Design",
+      "Batch Operations",
+      "Enterprise Features"
+    ],
+    "enterprise": [
+      "Commercial Licensing",
+      "Custom Development",
+      "Technical Support",
+      "Enterprise Deployment",
+      "API Integration"
+    ]
+  },
+  "changelog": {
+    "2.0.0": {
+      "date": "2025-01-01",
+      "type": "major",
+      "changes": [
+        "Rebranded to StreamVault Pro",
+        "Enhanced enterprise features",
+        "Improved license system",
+        "Modern UI redesign",
+        "Advanced transcript management",
+        "Commercial support options"
+      ]
+    },
+    "1.1.0": {
+      "date": "2024-12-15",
+      "type": "feature",
+      "changes": [
+        "Added transcript management system",
+        "Enhanced recording cards",
+        "Improved license system",
+        "UI optimizations",
+        "Bug fixes and performance improvements"
+      ]
     }
-  ]
+  }
 }

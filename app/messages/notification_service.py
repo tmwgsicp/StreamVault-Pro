@@ -1,6 +1,9 @@
 import base64
+import hashlib
+import hmac
 import re
 import smtplib
+import time
 from email.header import Header
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -54,6 +57,82 @@ class NotificationService:
             else:
                 results["error"].append(api)
                 logger.info(f"WeChat push failed, push address: {api},  Failure message: {json_data['msg']}")
+        return results
+
+    async def send_to_wecom(self, url: str, title: str, content: str) -> dict[str, Any]:
+        """企业微信机器人推送"""
+        results = {"success": [], "error": []}
+        api_list = url.replace("，", ",").split(",") if url.strip() else []
+        
+        # 构建markdown格式的消息内容
+        markdown_content = f"**{title}**\n\n{content}"
+        
+        for api in api_list:
+            json_data = {
+                "msgtype": "markdown",
+                "markdown": {
+                    "content": markdown_content
+                }
+            }
+            resp = await self._async_post(api, json_data)
+            if resp.get("errcode") == 0:
+                results["success"].append(api)
+                logger.info(f"WeCom push successful, push address: {api}")
+            else:
+                results["error"].append(api)
+                logger.info(f"WeCom push failed, push address: {api}, Error: {resp.get('errmsg', 'Unknown error')}")
+        return results
+
+    async def send_to_feishu(self, url: str, title: str, content: str, secret: str = "") -> dict[str, Any]:
+        """飞书机器人推送"""
+        results = {"success": [], "error": []}
+        api_list = url.replace("，", ",").split(",") if url.strip() else []
+        
+        for api in api_list:
+            json_data = {
+                "msg_type": "interactive",
+                "card": {
+                    "elements": [
+                        {
+                            "tag": "div",
+                            "text": {
+                                "content": f"**{title}**\n\n{content}",
+                                "tag": "lark_md"
+                            }
+                        }
+                    ],
+                    "header": {
+                        "title": {
+                            "content": title,
+                            "tag": "plain_text"
+                        },
+                        "template": "blue"
+                    }
+                }
+            }
+            
+            # 如果有签名密钥，添加签名验证
+            if secret:
+                timestamp = str(int(time.time()))
+                string_to_sign = f"{timestamp}\n{secret}"
+                sign = base64.b64encode(
+                    hmac.new(
+                        secret.encode("utf-8"), 
+                        string_to_sign.encode("utf-8"), 
+                        digestmod=hashlib.sha256
+                    ).digest()
+                ).decode('utf-8')
+                
+                json_data["timestamp"] = timestamp
+                json_data["sign"] = sign
+            
+            resp = await self._async_post(api, json_data)
+            if resp.get("code") == 0:
+                results["success"].append(api)
+                logger.info(f"Feishu push successful, push address: {api}")
+            else:
+                results["error"].append(api)
+                logger.info(f"Feishu push failed, push address: {api}, Error: {resp.get('msg', 'Unknown error')}")
         return results
 
     @staticmethod

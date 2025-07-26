@@ -152,14 +152,14 @@ class LeftNavigationMenu(ft.Column):
             self.dark_light_text.value = self._["dark_theme"]
             self.dark_light_icon.icon = ft.Icons.BRIGHTNESS_HIGH_OUTLINED
             self.dark_light_icon.tooltip = self._["toggle_day_theme"]
-            self.app.settings.user_config["theme_mode"] = "dark"
+            self.app.settings.default_config["theme_mode"] = "dark"
         else:
             page.theme_mode = ft.ThemeMode.LIGHT
             self.dark_light_text.value = self._["light_theme"]
             self.dark_light_icon.icon = ft.Icons.BRIGHTNESS_2_OUTLINED
             self.dark_light_icon.tooltip = self._["toggle_night_theme"]
-            self.app.settings.user_config["theme_mode"] = "light"
-        self.page.run_task(self.app.config_manager.save_user_config, self.app.settings.user_config)
+            self.app.settings.default_config["theme_mode"] = "light"
+        self.page.run_task(self.app.config_manager.save_user_config, self.app.settings.default_config)
         await self.on_theme_change()
         page.update()
 
@@ -196,6 +196,20 @@ class NavigationSidebar:
                 name="storage",
                 selected_icon=ft.Icons.DRIVE_FILE_MOVE_OUTLINE
             ),
-            ControlGroup(icon=ft.Icons.INFO, label=self._["about"], index=3, name="about", selected_icon=ft.Icons.INFO),
+            ControlGroup(
+                icon=ft.Icons.SUBTITLES,
+                label=self._["transcripts"],
+                index=3,
+                name="transcripts",
+                selected_icon=ft.Icons.SUBTITLES_OUTLINED
+            ),
+            ControlGroup(
+                icon=ft.Icons.VERIFIED_USER,
+                label=self._["license"],
+                index=4,
+                name="license",
+                selected_icon=ft.Icons.VERIFIED_USER_OUTLINED
+            ),
+            ControlGroup(icon=ft.Icons.INFO, label=self._["about"], index=5, name="about", selected_icon=ft.Icons.INFO),
         ]
         self.selected_control_group = self.control_groups[0]

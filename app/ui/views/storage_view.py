@@ -156,7 +156,7 @@ class StoragePage(BasePage):
 
         video_player = VideoPlayer(self.app)
 
-        if self.app.page.web:
+        if self.app.is_web:
             if not VIDEO_API_EXTERNAL_URL:
                 logger.error("VIDEO_API_EXTERNAL_URL is not set in .env")
                 await self.app.snack_bar.show_snack_bar(self._["video_api_server_not_set"])

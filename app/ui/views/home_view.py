@@ -18,7 +18,7 @@ class HomePage(PageBase):
         self.page_name = "home"
         self.recording_card_area = None
         self.add_recording_dialog = None
-        self.is_grid_view = app.settings.user_config.get("is_grid_view", True)
+        self.is_grid_view = app.settings.default_config.get("is_grid_view", True)
         self.loading_indicator = None
         self.app.language_manager.add_observer(self)
         self.load_language()
@@ -44,7 +44,7 @@ class HomePage(PageBase):
                 runs_count=3,
                 spacing=10,
                 run_spacing=10,
-                child_aspect_ratio=2.3,
+                child_aspect_ratio=1.35,  # 提高比例降低卡片高度，消除底部空白
                 controls=[]
             )
         else:
@@ -87,9 +87,20 @@ class HomePage(PageBase):
 
     async def toggle_view_mode(self, _):
         self.is_grid_view = not self.is_grid_view
-        current_content = self.recording_card_area.content
-        current_controls = current_content.controls if hasattr(current_content, 'controls') else []
-
+        
+        # 重新创建所有卡片以适应新的布局模式
+        await self.recreate_cards_for_layout()
+        
+        self.app.settings.default_config["is_grid_view"] = self.is_grid_view
+        self.page.run_task(self.app.config_manager.save_user_config, self.app.settings.default_config)
+    
+    async def recreate_cards_for_layout(self):
+        """重新创建所有卡片以适应当前布局模式"""
+        recordings = self.app.record_manager.recordings.copy()
+        
+        # 清空当前卡片
+        self.app.record_card_manager.cards_obj.clear()
+        
         column_width = 350
         runs_count = max(1, int(self.page.width / column_width))
 
@@ -99,29 +110,35 @@ class HomePage(PageBase):
                 runs_count=runs_count,
                 spacing=10,
                 run_spacing=10,
-                child_aspect_ratio=2.3,
-                controls=current_controls
+                child_aspect_ratio=1.35,  # 提高比例降低卡片高度，消除底部空白
+                controls=[]
             )
         else:
             new_content = ft.Column(
-                controls=current_controls,
+                controls=[],
                 spacing=5,
                 expand=True
             )
 
         self.recording_card_area.content = new_content
+
+        # 重新创建所有卡片
+        layout_mode = "grid" if self.is_grid_view else "list"
+        for recording in recordings:
+            card = await self.app.record_card_manager.create_card(recording, layout_mode)
+            self.recording_card_area.content.controls.append(card)
+
+        # 重新创建页面结构
         self.content_area.clean()
-        self.content_area.controls.extend(
-            [
-                self.create_home_title_area(),
-                self.create_filter_area(),
-                self.create_home_content_area()
-            ]
-        )
+        self.content_area.controls.extend([
+            self.create_home_title_area(),
+            self.create_filter_area(),
+            self.create_home_content_area()
+        ])
         self.content_area.update()
         
-        self.app.settings.user_config["is_grid_view"] = self.is_grid_view
-        self.page.run_task(self.app.config_manager.save_user_config, self.app.settings.user_config)
+        # 应用当前筛选
+        await self.apply_filter()
 
     def create_home_title_area(self):
         return ft.Row(
@@ -154,59 +171,303 @@ class HomePage(PageBase):
         )
     
     def create_filter_area(self):
-        """Create the filter area"""
-        return ft.Row(
-            [
-                ft.Text(self._["filter"] + ":", size=14),
-                ft.ElevatedButton(
-                    self._["filter_all"],
-                    on_click=self.filter_all_on_click,
-                    bgcolor=ft.colors.BLUE if self.current_filter == "all" else None,
-                    color=ft.colors.WHITE if self.current_filter == "all" else None,
-                    style=ft.ButtonStyle(
-                        shape=ft.RoundedRectangleBorder(radius=5),
-                    ),
-                ),
-                ft.ElevatedButton(
-                    self._["filter_recording"],
-                    on_click=self.filter_recording_on_click,
-                    bgcolor=ft.colors.GREEN if self.current_filter == "recording" else None,
-                    color=ft.colors.WHITE if self.current_filter == "recording" else None,
-                    style=ft.ButtonStyle(
-                        shape=ft.RoundedRectangleBorder(radius=5),
-                    ),
-                ),
-                ft.ElevatedButton(
-                    self._["filter_offline"],
-                    on_click=self.filter_offline_on_click,
-                    bgcolor=ft.colors.AMBER if self.current_filter == "offline" else None,
-                    color=ft.colors.WHITE if self.current_filter == "offline" else None,
-                    style=ft.ButtonStyle(
-                        shape=ft.RoundedRectangleBorder(radius=5),
-                    ),
-                ),
-                ft.ElevatedButton(
-                    self._["filter_error"],
-                    on_click=self.filter_error_on_click,
-                    bgcolor=ft.colors.RED if self.current_filter == "error" else None,
-                    color=ft.colors.WHITE if self.current_filter == "error" else None,
-                    style=ft.ButtonStyle(
-                        shape=ft.RoundedRectangleBorder(radius=5),
-                    ),
-                ),
-                ft.ElevatedButton(
-                    self._["filter_stopped"],
-                    on_click=self.filter_stopped_on_click,
-                    bgcolor=ft.colors.GREY if self.current_filter == "stopped" else None,
-                    color=ft.colors.WHITE if self.current_filter == "stopped" else None,
-                    style=ft.ButtonStyle(
-                        shape=ft.RoundedRectangleBorder(radius=5),
-                    ),
-                ),
-            ],
-            alignment=ft.MainAxisAlignment.START,
-            spacing=5,
+        """Create the enhanced filter and management area"""
+        # 搜索框
+        self.search_field = ft.TextField(
+            label=self._["search"],
+            hint_text="搜索主播名称、平台或URL...",
+            prefix_icon=ft.Icons.SEARCH,
+            on_change=self.on_search_change,
+            width=250,
         )
+        
+        # 状态筛选按钮
+        status_filters = ft.Row([
+            self.create_filter_button("all", self._["filter_all"], ft.Colors.BLUE, ft.Icons.ALL_INCLUSIVE),
+            self.create_filter_button("recording", self._["filter_recording"], ft.Colors.GREEN, ft.Icons.FIBER_MANUAL_RECORD),
+            self.create_filter_button("monitoring", "监控中", ft.Colors.ORANGE, ft.Icons.VISIBILITY),
+            self.create_filter_button("offline", self._["filter_offline"], ft.Colors.AMBER, ft.Icons.VISIBILITY_OFF),
+            self.create_filter_button("error", self._["filter_error"], ft.Colors.RED, ft.Icons.ERROR),
+            self.create_filter_button("stopped", self._["filter_stopped"], ft.Colors.GREY, ft.Icons.PAUSE),
+        ], spacing=5, scroll=ft.ScrollMode.AUTO)
+        
+        # 平台筛选下拉菜单
+        self.platform_dropdown = ft.Dropdown(
+            label="平台筛选",
+            hint_text="选择平台",
+            options=[
+                ft.dropdown.Option("all", "全部平台"),
+                ft.dropdown.Option("douyin", "抖音"),
+                ft.dropdown.Option("bilibili", "B站"),
+                ft.dropdown.Option("youtube", "YouTube"),
+                ft.dropdown.Option("twitch", "Twitch"),
+                ft.dropdown.Option("huya", "虎牙"),
+                ft.dropdown.Option("douyu", "斗鱼"),
+                ft.dropdown.Option("kuaishou", "快手"),
+                ft.dropdown.Option("other", "其他"),
+            ],
+            value="all",
+            on_change=self.on_platform_filter_change,
+            width=120,
+        )
+        
+        # 排序选项
+        self.sort_dropdown = ft.Dropdown(
+            label="排序方式",
+            hint_text="选择排序",
+            options=[
+                ft.dropdown.Option("name", "按名称"),
+                ft.dropdown.Option("status", "按状态"),
+                ft.dropdown.Option("platform", "按平台"),
+                ft.dropdown.Option("created", "按创建时间"),
+                ft.dropdown.Option("last_record", "按最后录制"),
+            ],
+            value="name",
+            on_change=self.on_sort_change,
+            width=120,
+        )
+        
+        # 统计信息
+        self.stats_text = ft.Text(
+            self.get_stats_text(),
+            size=12,
+            color=ft.Colors.GREY_600
+        )
+        
+        # 顶部操作栏
+        top_row = ft.Row([
+            ft.Text("录制管理", theme_style=ft.TextThemeStyle.TITLE_MEDIUM, weight=ft.FontWeight.BOLD),
+            ft.Container(expand=True),
+            self.search_field,
+            self.platform_dropdown,
+            self.sort_dropdown,
+            ft.VerticalDivider(width=1),
+            ft.IconButton(
+                icon=ft.Icons.GRID_VIEW if self.is_grid_view else ft.Icons.LIST,
+                tooltip=self._["toggle_view"],
+                on_click=self.toggle_view_mode,
+                style=ft.ButtonStyle(bgcolor=ft.Colors.BLUE_100)
+            ),
+            ft.IconButton(
+                icon=ft.Icons.REFRESH,
+                tooltip=self._["refresh"],
+                on_click=self.refresh_cards_on_click,
+                style=ft.ButtonStyle(bgcolor=ft.Colors.GREEN_100)
+            ),
+        ], alignment=ft.MainAxisAlignment.START, spacing=10)
+        
+        # 快速操作栏
+        action_row = ft.Row([
+            ft.ElevatedButton(
+                content=ft.Row([
+                    ft.Icon(ft.Icons.ADD, size=16),
+                    ft.Text("新增录制")
+                ], spacing=5, tight=True),
+                on_click=self.add_recording_on_click,
+                bgcolor=ft.Colors.BLUE_600,
+                color=ft.Colors.WHITE,
+                style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
+            ),
+            ft.Container(width=10),
+            ft.ElevatedButton(
+                content=ft.Row([
+                    ft.Icon(ft.Icons.PLAY_ARROW, size=16),
+                    ft.Text("批量开始")
+                ], spacing=5, tight=True),
+                on_click=self.start_monitor_recordings_on_click,
+                bgcolor=ft.Colors.GREEN_600,
+                color=ft.Colors.WHITE,
+                style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
+            ),
+            ft.ElevatedButton(
+                content=ft.Row([
+                    ft.Icon(ft.Icons.STOP, size=16),
+                    ft.Text("批量停止")
+                ], spacing=5, tight=True),
+                on_click=self.stop_monitor_recordings_on_click,
+                bgcolor=ft.Colors.ORANGE_600,
+                color=ft.Colors.WHITE,
+                style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
+            ),
+            ft.ElevatedButton(
+                content=ft.Row([
+                    ft.Icon(ft.Icons.DELETE_SWEEP, size=16),
+                    ft.Text("批量删除")
+                ], spacing=5, tight=True),
+                on_click=self.delete_monitor_recordings_on_click,
+                bgcolor=ft.Colors.RED_600,
+                color=ft.Colors.WHITE,
+                style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=8))
+            ),
+            ft.Container(expand=True),
+            self.stats_text,
+        ], alignment=ft.MainAxisAlignment.START, spacing=8)
+        
+        return ft.Column([
+            top_row,
+            ft.Container(height=8),
+            ft.Text("状态筛选:", size=12, weight=ft.FontWeight.BOLD),
+            status_filters,
+            ft.Container(height=8),
+            action_row,
+            ft.Divider(height=1, thickness=1),
+        ], spacing=5)
+    
+    def create_filter_button(self, filter_type, text, color, icon):
+        """创建筛选按钮"""
+        is_active = self.current_filter == filter_type
+        return ft.ElevatedButton(
+            content=ft.Row([
+                ft.Icon(icon, size=14),
+                ft.Text(text, size=12)
+            ], spacing=3, tight=True),
+            on_click=lambda _: self.apply_filter_by_type(filter_type),
+            bgcolor=color if is_active else ft.Colors.GREY_100,
+            color=ft.Colors.WHITE if is_active else ft.Colors.GREY_700,
+            style=ft.ButtonStyle(
+                shape=ft.RoundedRectangleBorder(radius=6),
+                padding=ft.Padding(8, 4, 8, 4)
+            ),
+        )
+    
+    async def on_search_change(self, e):
+        """搜索框变化事件"""
+        query = e.control.value
+        # 使用防抖优化搜索性能
+        await self.debounced_search(query)
+        self.update_stats()
+    
+    async def debounced_search(self, query: str):
+        """防抖搜索，避免频繁查询"""
+        # 取消之前的搜索任务
+        if hasattr(self, '_search_task') and not self._search_task.done():
+            self._search_task.cancel()
+        
+        # 创建新的搜索任务
+        self._search_task = asyncio.create_task(self._perform_search(query))
+        await self._search_task
+    
+    async def _perform_search(self, query: str):
+        """执行实际的搜索操作"""
+        await asyncio.sleep(0.3)  # 300ms防抖延迟
+        await self.filter_recordings(query)
+    
+    async def on_platform_filter_change(self, e):
+        """平台筛选变化事件"""
+        platform = e.control.value
+        await self.apply_platform_filter(platform)
+        self.update_stats()
+    
+    async def on_sort_change(self, e):
+        """排序方式变化事件"""
+        sort_type = e.control.value
+        await self.apply_sort(sort_type)
+    
+    async def apply_filter_by_type(self, filter_type):
+        """应用状态筛选"""
+        self.current_filter = filter_type
+        await self.apply_filter()
+        self.update_stats()
+        # 重新创建筛选区域以更新按钮状态
+        self.content_area.controls[1] = self.create_filter_area()
+        self.content_area.update()
+    
+    async def apply_platform_filter(self, platform):
+        """应用平台筛选"""
+        cards_obj = self.app.record_card_manager.cards_obj
+        recordings = self.app.record_manager.recordings
+        
+        for recording in recordings:
+            card_info = cards_obj.get(recording.rec_id)
+            if not card_info:
+                continue
+            
+            # 检查是否符合平台筛选
+            platform_match = True
+            if platform != "all":
+                recording_platform = self.extract_platform_from_url(recording.url).lower()
+                platform_match = platform in recording_platform or recording_platform in platform
+            
+            # 检查是否符合状态筛选
+            status_match = self.should_show_recording(self.current_filter, recording)
+            
+            card_info["card"].visible = platform_match and status_match
+        
+        self.recording_card_area.update()
+    
+    def extract_platform_from_url(self, url: str) -> str:
+        """从URL中提取平台信息"""
+        if not url:
+            return "other"
+        
+        url_lower = url.lower()
+        if "douyin" in url_lower or "tiktok" in url_lower:
+            return "douyin"
+        elif "bilibili" in url_lower:
+            return "bilibili"
+        elif "youtube" in url_lower:
+            return "youtube"
+        elif "twitch" in url_lower:
+            return "twitch"
+        elif "huya" in url_lower:
+            return "huya"
+        elif "douyu" in url_lower:
+            return "douyu"
+        elif "kuaishou" in url_lower:
+            return "kuaishou"
+        else:
+            return "other"
+    
+    async def apply_sort(self, sort_type):
+        """应用排序"""
+        recordings = self.app.record_manager.recordings.copy()
+        
+        if sort_type == "name":
+            recordings.sort(key=lambda r: r.streamer_name or "")
+        elif sort_type == "status":
+            recordings.sort(key=lambda r: (
+                0 if r.recording else
+                1 if r.is_live and r.monitor_status else
+                2 if r.monitor_status else
+                3
+            ))
+        elif sort_type == "platform":
+            recordings.sort(key=lambda r: self.extract_platform_from_url(r.url))
+        elif sort_type == "created":
+            recordings.sort(key=lambda r: r.rec_id)  # 按创建顺序
+        elif sort_type == "last_record":
+            recordings.sort(key=lambda r: getattr(r, 'last_record_time', ''), reverse=True)
+        
+        # 重新排列卡片
+        cards_obj = self.app.record_card_manager.cards_obj
+        sorted_cards = []
+        for recording in recordings:
+            card_info = cards_obj.get(recording.rec_id)
+            if card_info and card_info["card"]:
+                sorted_cards.append(card_info["card"])
+        
+        self.recording_card_area.content.controls.clear()
+        self.recording_card_area.content.controls.extend(sorted_cards)
+        self.recording_card_area.update()
+    
+    def get_stats_text(self):
+        """获取统计信息文本"""
+        recordings = self.app.record_manager.recordings
+        if not recordings:
+            return "暂无录制项目"
+        
+        total = len(recordings)
+        recording_count = sum(1 for r in recordings if r.recording)
+        monitoring_count = sum(1 for r in recordings if r.monitor_status and not r.recording)
+        live_count = sum(1 for r in recordings if r.is_live and r.monitor_status)
+        
+        return f"总计: {total} | 录制中: {recording_count} | 监控中: {monitoring_count} | 直播中: {live_count}"
+    
+    def update_stats(self):
+        """更新统计信息"""
+        if hasattr(self, 'stats_text'):
+            self.stats_text.value = self.get_stats_text()
+            self.stats_text.update()
     
     async def filter_all_on_click(self, _):
         self.current_filter = "all"
@@ -265,13 +526,21 @@ class HomePage(PageBase):
 
     @staticmethod
     def should_show_recording(filter_type, recording):
-        return (
-                filter_type == "all"
-                or (filter_type == "recording" and recording.recording)
-                or (filter_type == "error" and recording.status_info == RecordingStatus.RECORDING_ERROR)
-                or (filter_type == "offline" and not recording.is_live and recording.monitor_status)
-                or (filter_type == "stopped" and not recording.monitor_status)
-        )
+        """判断录制项目是否应该显示在当前筛选条件下"""
+        if filter_type == "all":
+            return True
+        elif filter_type == "recording":
+            return recording.recording
+        elif filter_type == "monitoring":
+            return recording.monitor_status and not recording.recording and recording.is_live
+        elif filter_type == "error":
+            return recording.status_info == RecordingStatus.RECORDING_ERROR
+        elif filter_type == "offline":
+            return not recording.is_live and recording.monitor_status and not recording.recording
+        elif filter_type == "stopped":
+            return not recording.monitor_status
+        else:
+            return True
 
     async def filter_recordings(self, query):
         recordings = self.app.record_manager.recordings
@@ -336,7 +605,9 @@ class HomePage(PageBase):
                 existing_cards.append(existing_card)
         
         async def create_card_with_time_range(_recording: Recording):
-            _card = await self.app.record_card_manager.create_card(_recording)
+            # 传递当前的视图模式
+            layout_mode = "grid" if self.is_grid_view else "list"
+            _card = await self.app.record_card_manager.create_card(_recording, layout_mode)
             _recording.scheduled_time_range = await self.app.record_manager.get_scheduled_time_range(
                 _recording.scheduled_start_time, _recording.monitor_hours
             )
@@ -376,7 +647,7 @@ class HomePage(PageBase):
         await self.apply_filter()
 
     async def add_recording(self, recordings_info):
-        user_config = self.app.settings.user_config
+        default_config = self.app.settings.default_config
         logger.info(f"Add items: {len(recordings_info)}")
         
         new_recordings = []
@@ -403,25 +674,26 @@ class HomePage(PageBase):
                     url=recording_info["url"],
                     streamer_name=recording_info["streamer_name"],
                     quality=recording_info["quality"],
-                    record_format=user_config.get("video_format", "TS"),
-                    segment_record=user_config.get("segmented_recording_enabled", False),
-                    segment_time=user_config.get("video_segment_time", "1800"),
+                    record_format=default_config.get("video_format", "TS"),
+                    segment_record=default_config.get("segmented_recording_enabled", False),
+                    segment_time=default_config.get("video_segment_time", "1800"),
                     monitor_status=True,
-                    scheduled_recording=user_config.get("scheduled_recording", False),
-                    scheduled_start_time=user_config.get("scheduled_start_time"),
-                    monitor_hours=user_config.get("monitor_hours"),
+                    scheduled_recording=default_config.get("scheduled_recording", False),
+                    scheduled_start_time=default_config.get("scheduled_start_time"),
+                    monitor_hours=default_config.get("monitor_hours"),
                     recording_dir=None,
                     enabled_message_push=False
                 )
 
-            recording.loop_time_seconds = int(user_config.get("loop_time_seconds", 300))
+            recording.loop_time_seconds = int(default_config.get("loop_time_seconds", 300))
             recording.update_title(self._[recording.quality])
             await self.app.record_manager.add_recording(recording)
             new_recordings.append(recording)
 
         if new_recordings:
             async def create_card_with_time_range(rec):
-                _card = await self.app.record_card_manager.create_card(rec)
+                layout_mode = "grid" if self.is_grid_view else "list"
+                _card = await self.app.record_card_manager.create_card(rec, layout_mode)
                 rec.scheduled_time_range = await self.app.record_manager.get_scheduled_time_range(
                     rec.scheduled_start_time, rec.monitor_hours
                 )
@@ -546,7 +818,8 @@ class HomePage(PageBase):
         self.loading_indicator.update()
         
         if recording.rec_id not in self.app.record_card_manager.cards_obj:
-            card = await self.app.record_card_manager.create_card(recording)
+            layout_mode = "grid" if self.is_grid_view else "list"
+            card = await self.app.record_card_manager.create_card(recording, layout_mode)
             recording.scheduled_time_range = await self.app.record_manager.get_scheduled_time_range(
                 recording.scheduled_start_time, recording.monitor_hours
             )

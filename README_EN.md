@@ -1,305 +1,160 @@
 <div align="center">
-  <img src="./assets/images/logo.svg" alt="StreamCap" />
+  <img src="./assets/images/logo.svg" alt="StreamVault Pro" />
 </div>
 <p align="center">
   <img alt="Python version" src="https://img.shields.io/badge/python-3.10%2B-blue.svg">
-  <a href="https://github.com/ihmily/StreamCap">
+  <a href="https://github.com/tmwgsicp/StreamVault-Pro">
       <img alt="Supported Platforms" src="https://img.shields.io/badge/Platforms-Win%20%7C%20Mac%20%7C%20Linux-6B5BFF.svg"></a>
-    <a href="https://hub.docker.com/r/ihmily/streamcap/tags">
-      <img alt="Docker Pulls" src="https://img.shields.io/docker/pulls/ihmily/streamcap?label=Docker%20Pulls&color=2496ED&logo=docker"></a>
-  <a href="https://github.com/ihmily/StreamCap/releases/latest">
-      <img alt="Latest Release" src="https://img.shields.io/github/v/release/ihmily/StreamCap"></a>
-  <a href="https://github.com/ihmily/StreamCap/releases/latest">
-      <img alt="Downloads" src="https://img.shields.io/github/downloads/ihmily/StreamCap/total"></a>
+  <a href="https://github.com/tmwgsicp/StreamVault-Pro/releases/latest">
+      <img alt="Latest Release" src="https://img.shields.io/github/v/release/tmwgsicp/StreamVault-Pro"></a>
+  <a href="https://github.com/tmwgsicp/StreamVault-Pro/releases/latest">
+      <img alt="Downloads" src="https://img.shields.io/github/downloads/tmwgsicp/StreamVault-Pro/total"></a>
+  <a href="https://github.com/tmwgsicp/StreamVault-Pro/blob/main/LICENSE">
+      <img alt="License" src="https://img.shields.io/badge/license-Apache%202.0-blue.svg"></a>
 </p>
 <div align="center">
-  English / <a href="./README.md">Chinese</a>
+  <a href="./README.md">简体中文</a> / English
 </div><br>
 
+# 🚀 StreamVault Pro - Professional Live Stream Recording Platform
 
+**StreamVault Pro** is a powerful professional-grade live stream recording and management platform, built upon the open-source [StreamCap](https://github.com/ihmily/StreamCap) project with extensive optimizations and feature enhancements. We are committed to providing users with more professional and efficient live content management solutions.
 
-StreamCap is a multi-platform live stream recording client based on FFmpeg and StreamGet. It covers over 40 mainstream live streaming platforms both domestically and internationally, and supports features such as batch recording, loop monitoring, timed monitoring, and automatic transcoding.
+## 📋 Project Information
 
-## ✨Features
+This project is a secondary development based on the open-source [StreamCap](https://github.com/ihmily/StreamCap) project, following the Apache-2.0 license.
 
-- **Multi-Platform Support**: Compatible with Windows, macOS, and Web environments.
-- **Loop Monitoring**: Real-time monitoring of live stream status. Recording starts immediately when a stream goes live.
-- **Scheduled Tasks**: Checks live stream status within a set time range.
-- **Multiple Output Formats**: Supports ts, flv, mkv, mov, mp4, mp3, m4a, and other formats.
-- **Automatic Transcoding**: Automatically transcodes recorded files to mp4 format after recording.
-- **Message Push**: Supports live stream status push notifications to keep you informed of live status.
+**Original Author:** [ihmily](https://github.com/ihmily)  
+**Project Maintainer:** [tmwgsicp](https://github.com/tmwgsicp)  
+**Project Repository:** https://github.com/tmwgsicp/StreamVault-Pro
 
-## 📸Recording Interface
+## ✨ Core Features
 
-![StreamCap Interface](./assets/images/example02.jpg)
+### 🎯 Professional Recording
+- **40+ Platform Support**: Covers major live streaming platforms including Douyin, Kuaishou, Bilibili, Huya, Douyu, TikTok, YouTube, and more
+- **Smart Monitoring**: Continuous live status monitoring, auto-record when streaming starts, supports scheduled tasks and automatic detection
+- **Multi-format Output**: Supports ts, flv, mkv, mov, mp4, mp3, m4a, and other output formats
+- **Auto Transcoding**: Automatically transcode to mp4 format after recording completion
+- **High-quality Recording**: Multiple quality options to ensure recording quality
 
-## 🛠️Quick Start
+### 📝 Intelligent Transcript Management
+- **Multi-format Support**: Automatic recognition and management of transcript files in recording directories (txt, srt, vtt, lrc formats)
+- **Smart Search**: Keyword search and date filtering with search result highlighting
+- **Batch Operations**: Support for batch export and management operations
+- **Content Statistics**: Display word count, line count, file size and other detailed information
+- **Enhanced Preview**: Optimized transcript viewing interface for better reading experience
 
-### 1. **Run the Pre-Built Program**
+### 🎨 Modern Interface Design
+- **Enhanced Recording Cards**: Platform icon recognition, status color indicators, smart time information display
+- **Data Visualization**: User-friendly data formatting display (duration, speed, file size)
+- **Responsive Layout**: Support for grid view and list view, adapting to different usage habits
+- **Dark/Light Themes**: Support for dark and light theme mode switching
+- **Modern Design**: Material Design style, professional and beautiful
 
-Visit the [StreamCap Releases](https://github.com/ihmily/StreamCap/releases/latest) page and download the latest version according to your operating system:
+### 🌐 Cross-platform Support
+- **Desktop Applications**: Native support for Windows, macOS, Linux
+- **Web Version**: Direct browser access, no installation required
 
-- **Windows Users**: Download the `StreamCap.zip` file, extract it, and run `StreamCap.exe`.
-- **macOS Users**: Download the `StreamCap.dmg` file and follow the on-screen instructions to install, then you can find the application in the Launchpad to run it.
+## 📸 Interface Preview
 
-### 2. Running from Source Code
+![StreamVault Pro Interface](./assets/images/example01.png)
 
-Ensure you have **Python 3.10** or a higher version installed.💥
+## 🚀 Quick Start
 
-1.**Clone the Project Code**:
+### Run from Source
 
 ```bash
-git clone https://github.com/ihmily/StreamCap.git
-cd StreamCap
-```
+# Clone repository
+git clone https://github.com/tmwgsicp/StreamVault-Pro.git
+cd StreamVault-Pro
 
-2.**Install Dependencies**:
-
-```bash
-# Install core dependencies
-pip install -i https://pypi.org/simple streamget 
-
-# For desktop
+# Install dependencies
 pip install -r requirements.txt
 
-# For web
-pip install -r requirements-web.txt
-```
-
-3.**Configure the Runtime Environment**：
-
-Copy the `.env.example` sample configuration file and rename it to `.env`
-
-```bash
-cp .env.example .env
-```
-
-4.**Run the Program**:
-
-On Windows and macOS, the program runs as a desktop application by default. Use the following command to start the program:
-
-```bash
+# Run desktop version
 python main.py
+
+# Run web version
+python main.py --web --host 0.0.0.0 --port 8080
 ```
 
-On Linux, please run in web mode. Modify the `.env` file and change the value of `PLATFORM` to `web` to run in web mode.
+Then visit `http://localhost:8080` in your browser (for web version)
 
-Alternatively, you can start it without modifying the configuration file by using the following command:
+### System Requirements
+
+- **Python**: 3.10 or higher
+- **FFmpeg**: For video recording and transcoding
+- **Operating System**: Windows 10+, macOS 10.14+, Linux (Ubuntu 18.04+)
+
+## 📚 User Guide
+
+### Basic Recording
+1. Add live stream URL
+2. Select recording quality and format
+3. Set save path
+4. Start monitoring and recording
+
+### Advanced Features
+- **Transcript Management**: Automatically scan and manage transcript content from recordings
+- **Batch Operations**: Monitor multiple live streams simultaneously
+- **Scheduled Tasks**: Set specific time periods for recording
+- **Message Notifications**: Receive live status notifications
+
+## 🔧 Configuration
+
+Main configuration files are located in the `config/` directory:
+- `settings.json` - Main settings
+- `accounts.json` - Account configuration
+- `cookies.json` - Cookie configuration
+- `version.json` - Version information
+
+## 🤝 Contributing
+
+We welcome community contributions! Please check the [Contributing Guide](./CONTRIBUTING.md) to learn how to participate in project development.
+
+### Development Environment Setup
 
 ```bash
-python main.py --web
+# Install development dependencies
+pip install -r requirements-dev.txt
+
+# Run tests
+python -m pytest
+
+# Code formatting
+python -m ruff format .
+
+# Type checking
+python -m mypy app/
 ```
 
-After successful startup, access it via `http://127.0.0.1:6006`.For more configuration details, refer to the [Web Operation Guide](https://github.com/ihmily/StreamCap/wiki/Installation-Guide#web-operation)
+## 📄 License
 
-If the program prompts that FFmpeg is missing, please visit the FFmpeg official download page [Download FFmpeg](https://ffmpeg.org/download.html) to download the precompiled FFmpeg executable files and configure the environment variables.
+This project is licensed under the [Apache License 2.0](./LICENSE).
 
-## 🐋Docker Running
+- ✅ Commercial use
+- ✅ Modification
+- ✅ Distribution
+- ✅ Patent use
+- ✅ Private use
 
-No Python environment is required on your local machine. Before running the commands, ensure that you have installed [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/).
+**Note**: When using this software to record live content, please comply with the relevant platform terms of service and local laws and regulations.
 
-1.**Quick Start**
+## 📞 Support & Feedback
 
-The simplest method is to use `docker compose`. Navigate to the project root directory and execute the following command (ensure the `.env` file exists):
+- **Documentation**: [Wiki](https://github.com/tmwgsicp/StreamVault-Pro/wiki)
+- **Bug Reports**: [Issues](https://github.com/tmwgsicp/StreamVault-Pro/issues)
+- **Feature Requests**: [Discussions](https://github.com/tmwgsicp/StreamVault-Pro/discussions)
+- **Email Contact**: tmwgsicp@outlook.com
 
-```bash
-docker compose up
-```
+## 🙏 Acknowledgments
 
-You can use the `-d` flag to run in the background. Note that the default timezone in the container is `Asia/Shanghai`. If you need to change it, you can configure it in the `.env` file.
+- Thanks to [ihmily](https://github.com/ihmily) for providing the excellent open-source project [StreamCap](https://github.com/ihmily/StreamCap)
+- Thanks to all contributors and users for their support and feedback
+- Thanks to the open-source community for providing excellent tools and libraries
 
-2.**Stop Container Instances**:
+---
 
-```bash
-docker compose stop
-```
-
-3.**Build the Image(Optional)**:
-
-The code version in the Docker image repository may not always be the latest. If you need to run the latest code from the main branch of this repository, you can build it locally as a custom image.
-
-```
-docker build -t streamcap .
-```
-
-## 😺 Supported Platforms
-
-**Domestic Platforms (30+)**:  
-Douyin, Kuaishou, Huya, Douyu, Bilibili, RedNote, YY, Inke, Acfun, Blued, JD, Taobao, ...
-
-**International Platforms (10+)**:  
-TikTok, Twitch, PandTV, Soop, Twitcasting, CHZZK, Shopee, YouTube, LiveMe, Flextv, Popkontv, Bigo, ...
-
-**Example URLs**:  
-
-If no specific note is provided, the live stream room URL is used for recording by default.
-
-```
-Douyin:
-https://live.douyin.com/745964462470
-https://v.douyin.com/iQFeBnt/ (Node.js Required)
-https://live.douyin.com/yall1102  （Link+unique ID）
-https://v.douyin.com/CeiU5cbX  (Anchor's homepage URL)
-
-TikTok:
-https://www.tiktok.com/@pearlgaga88/live
-
-Kuaishou:
-https://live.kuaishou.com/u/yall1102
-
-Huya:
-https://www.huya.com/52333
-
-Douyu:
-https://www.douyu.com/3637778?dyshid=
-https://www.douyu.com/topic/wzDBLS6?rid=4921614&dyshid=
-
-YY:
-https://www.yy.com/22490906/22490906
-
-BiliBili:
-https://live.bilibili.com/320
-
-ReadNote:
-(One-time use URLs, not supported for loop monitoring)
-http://xhslink.com/xpJpfM
-
-Bigo:
-https://www.bigo.tv/cn/716418802
-
-Blued:
-https://app.blued.cn/live?id=Mp6G2R
-
-SOOP:
-https://play.sooplive.co.kr/sw7love
-
-Netease CC:
-https://cc.163.com/583946984
-
-Qiandurebo:
-https://qiandurebo.com/web/video.php?roomnumber=33333
-
-PandaTV:
-https://www.pandalive.co.kr/live/play/bara0109
-
-MaoerFM:
-https://fm.missevan.com/live/868895007
-
-Look Live:
-https://look.163.com/live?id=65108820&position=3
-
-WinkTV:
-https://www.winktv.co.kr/live/play/anjer1004
-
-FlexTV:
-https://www.flextv.co.kr/channels/593127/live
-
-PopkonTV:
-https://www.popkontv.com/live/view?castId=wjfal007&partnerCode=P-00117
-https://www.popkontv.com/channel/notices?mcid=wjfal007&mcPartnerCode=P-00117
-
-TwitCasting:
-https://twitcasting.tv/c:uonq
-
-Baidu Live:
-https://live.baidu.com/m/media/pclive/pchome/live.html?room_id=9175031377&tab_category
-
-Weibo Live:
-https://weibo.com/l/wblive/p/show/1022:2321325026370190442592
-
-Kugou Live:
-https://fanxing2.kugou.com/50428671?refer=2177&sourceFrom=
-
-TwitchTV:
-https://www.twitch.tv/gamerbee
-
-LiveMe:
-https://www.liveme.com/zh/v/17141543493018047815/index.html
-
-Huajiao Live:
-(One-time use URLs, not supported for loop monitoring)
-https://www.huajiao.com/l/345096174
-
-ShowRoom:
-https://www.showroom-live.com/room/profile?room_id=480206  (Anchor's homepage URL)
-
-Acfun:
-https://live.acfun.cn/live/179922
-
-Inke:
-https://www.inke.cn/liveroom/index.html?uid=22954469&id=1720860391070904
-
-Yinbo:
-https://live.ybw1666.com/800002949
-
-Zhihu:
-https://www.zhihu.com/people/ac3a467005c5d20381a82230101308e9  (Anchor's homepage URL)
-
-CHZZK:
-https://chzzk.naver.com/live/458f6ec20b034f49e0fc6d03921646d2
-
-Haixiu Live:
-https://www.haixiutv.com/6095106
-
-VVXqiu:
-https://h5webcdn-pro.vvxqiu.com//activity/videoShare/videoShare.html?h5Server=https://h5p.vvxqiu.com&roomId=LP115924473&platformId=vvstar
-
-17Live:
-https://17.live/en/live/6302408
-
-Lang Live:
-https://www.lang.live/en-US/room/3349463
-
-PiaoPiao Live:
-https://m.pp.weimipopo.com/live/preview.html?uid=91648673&anchorUid=91625862&app=plpl
-
-Six Room Live:
-https://v.6.cn/634435
-
-Lehai Live:
-https://www.lehaitv.com/8059096
-
-Catshow Live:
-https://h.catshow168.com/live/preview.html?uid=19066357&anchorUid=18895331
-
-Shopee:
-https://sg.shp.ee/GmpXeuf?uid=1006401066&session=802458
-
-Youtube:
-(Requires configuring cookies)
-https://www.youtube.com/watch?v=cS6zS5hi1w0
-
-Taobao:
-(Requires configuring cookies)
-https://m.tb.cn/h.TWp0HTd
-
-JD:
-https://3.cn/28MLBy-E
-
-Faceit:
-https://www.faceit.com/zh/players/Compl1/stream
-```
-
-## 📖Documentation
-
-For full documentation and advanced usage, visit the [official documentation](https://github.com/ihmily/StreamCap/wiki).
-
-## ❤️Contributors
-
-<a href="https://github.com/ihmily/StreamCap/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=ihmily/StreamCap" />
-</a>
-
-## 📜License
-
-StreamCap is released under the Apache License 2.0. For more details, see the [LICENSE](./LICENSE) file.
-
-## 🙏Special Thanks
-
-Special thanks to the following open-source projects and technologies for their support:
-
-- [flet](https://github.com/flet-dev/flet)
-- [FFmpeg](https://ffmpeg.org)
-- [streamget](https://github.com/ihmily/streamget)
-
-If you have any questions or suggestions, please feel free to contact us via GitHub Issues.
+<div align="center">
+  <strong>Making live content management more professional and efficient 🚀</strong>
+</div>

@@ -32,7 +32,7 @@ class ThemeManager:
         self.page.theme = create_light_theme(self.custom_font)
         self.page.dark_theme = create_dark_theme(self.custom_font)
         
-        self.theme_color = self.app.settings.user_config.get("theme_color", "blue")
+        self.theme_color = self.app.settings.default_config.get("theme_color", "blue")
         await self.update_theme_color(self.theme_color)
 
     async def update_theme_color(self, color):
@@ -41,5 +41,5 @@ class ThemeManager:
         self.page.theme.color_scheme = ft.ColorScheme(primary=color)
         self.page.update()
         
-        self.app.settings.user_config["theme_color"] = color
-        self.page.run_task(self.app.config_manager.save_user_config, self.app.settings.user_config)
+        self.app.settings.default_config["theme_color"] = color
+        self.page.run_task(self.app.config_manager.save_user_config, self.app.settings.default_config)

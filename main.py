@@ -41,6 +41,8 @@ def get_route_handler() -> dict[str, str]:
         "/home": "home",
         "/settings": "settings",
         "/storage": "storage",
+        "/transcripts": "transcripts",
+        "/license": "license",
         "/about": "about",
     }
 
@@ -80,17 +82,17 @@ def handle_disconnect(page: ft.Page) -> callable:
 
 def main(page: ft.Page) -> None:
 
-    page.title = "StreamCap"
+    page.title = "StreamVault Pro"
     page.window.min_width = MIN_WIDTH
     page.window.min_height = MIN_WIDTH * WINDOW_SCALE
 
     is_web = args.web or platform == "web"
     setup_window(page, is_web)
 
-    app = App(page)
+    app = App(page, is_web=is_web)
     page.data = app
     
-    theme_mode = app.settings.user_config.get("theme_mode", "light")
+    theme_mode = app.settings.default_config.get("theme_mode", "light")
     if theme_mode == "dark":
         page.theme_mode = ft.ThemeMode.DARK
     else:

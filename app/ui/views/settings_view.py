@@ -17,9 +17,8 @@ class SettingsPage(PageBase):
         self.page_name = "settings"
         self.config_manager = self.app.config_manager
 
-        self.user_config = self.config_manager.load_user_config()
-        self.language_option = self.config_manager.load_language_config()
         self.default_config = self.config_manager.load_default_config()
+        self.language_option = self.config_manager.load_language_config()
         self.cookies_config = self.config_manager.load_cookies_config()
         self.accounts_config = self.config_manager.load_accounts_config()
 
@@ -38,6 +37,11 @@ class SettingsPage(PageBase):
 
     async def load(self):
         """Load the settings page content with tabs for different categories."""
+
+        # 重新加载配置，确保UI显示最新的配置值
+        self.default_config = self.config_manager.load_default_config()
+        self.cookies_config = self.config_manager.load_cookies_config()
+        self.accounts_config = self.config_manager.load_accounts_config()
 
         self.content_area.clean()
         language = self.app.language_manager.language
@@ -82,19 +86,19 @@ class SettingsPage(PageBase):
 
     def init_unsaved_changes(self):
         self.has_unsaved_changes = {
-            "user_config": False,
+            "default_config": False,
             "cookies_config": False,
             "accounts_config": False
         }
 
     def load_language(self):
         self.default_language, default_language_code = list(self.language_option.items())[0]
-        select_language = self.user_config.get("language")
+        select_language = self.default_config.get("language")
         self.language_code = self.language_option.get(select_language, default_language_code)
         self.app.language_code = self.language_code
 
     def get_config_value(self, key, default=None):
-        return self.user_config.get(key, self.default_config.get(key, default))
+        return self.default_config.get(key, default)
 
     def get_cookies_value(self, key, default=""):
         return self.cookies_config.get(key, default)
@@ -107,15 +111,30 @@ class SettingsPage(PageBase):
         """Restore settings to their default values."""
 
         async def confirm_dlg(_):
-            ui_language = self.user_config["language"]
-            self.user_config = self.default_config.copy()
-            self.user_config["language"] = ui_language
+            # 重新加载默认配置的备份值
+            original_default = self.config_manager._load_config(
+                self.config_manager.default_config_path.replace(".json", "_backup.json"),
+                "backup config"
+            )
+            if not original_default:
+                # 如果没有备份，使用基础默认值
+                original_default = {
+                    "language": "Chinese",
+                    "video_format": "MP4",
+                    "convert_to_mp4": True,
+                    "delete_original": True,
+                    # ... 其他基础默认值
+                }
+            
+            ui_language = self.default_config["language"]
+            self.default_config = original_default.copy()
+            self.default_config["language"] = ui_language
             self.app.language_manager.notify_observers()
             self.page.run_task(self.load)
-            await self.config_manager.save_user_config(self.user_config)
+            await self.config_manager.save_user_config(self.default_config)
             logger.success("Default configuration restored.")
             await self.app.snack_bar.show_snack_bar(self._["success_restore_tip"], bgcolor=ft.Colors.GREEN)
-            await close_dialog(None)
+            await close_dialog(_)
 
         async def close_dialog(_):
             restore_alert_dialog.open = False
@@ -139,26 +158,48 @@ class SettingsPage(PageBase):
     async def on_change(self, e):
         """Handle changes in any input field and trigger auto-save."""
         key = e.control.data
+        
+        # 获取新值
         if isinstance(e.control, (ft.Switch, ft.Checkbox)):
-            self.user_config[key] = e.data.lower() == "true"
+            new_value = e.data.lower() == "true"
         else:
-            self.user_config[key] = e.data
-            
-        if key in ["folder_name_platform", "folder_name_author", "folder_name_time", "folder_name_title"]:
-            for recording in self.app.record_manager.recordings:
-                recording.recording_dir = None
-            self.page.run_task(self.app.record_manager.persist_recordings)
-            
-        if key == "language":
-            self.load_language()
-            self.app.language_manager.load()
-            self.app.language_manager.notify_observers()
-            self.page.run_task(self.load)
+            new_value = e.data
+        
+        # 获取原值 - 如果配置项不存在，不要自动创建它
+        old_value = self.default_config.get(key)
+        
+        # 只有当配置项存在或者是重要的基础配置项时，才保存
+        important_keys = {
+            "language", "live_save_path", "video_format", "record_quality", 
+            "theme_mode", "theme_color", "is_grid_view", "loop_time_seconds",
+            "folder_name_platform", "folder_name_author", "folder_name_time", "folder_name_title",
+            # 添加服务商切换相关的重要配置项
+            "oss_provider", "speech_recognition_provider"
+        }
+        
+        # 只保存存在的配置项或重要的基础配置项
+        if key in self.default_config or key in important_keys:
+            # 只有值真正发生变化时才保存
+            if old_value != new_value:
+                self.default_config[key] = new_value
+                
+                if key in ["folder_name_platform", "folder_name_author", "folder_name_time", "folder_name_title"]:
+                    for recording in self.app.record_manager.recordings:
+                        recording.recording_dir = None
+                    self.page.run_task(self.app.record_manager.persist_recordings)
+                    
+                if key == "language":
+                    self.load_language()
+                    self.app.language_manager.load()
+                    self.app.language_manager.notify_observers()
+                    self.page.run_task(self.load)
 
-        if key == "loop_time_seconds":
-            self.app.record_manager.initialize_dynamic_state()
-        self.page.run_task(self.delay_handler.start_task_timer, self.save_user_config_after_delay, None)
-        self.has_unsaved_changes['user_config'] = True
+                # 处理影响录制状态的配置项
+                if key in ["loop_time_seconds", "notify_loop_time", "only_notify_no_record"]:
+                    self.app.record_manager.initialize_dynamic_state()
+                    
+                self.page.run_task(self.delay_handler.start_task_timer, self.save_default_config_after_delay, None)
+                self.has_unsaved_changes['default_config'] = True
 
     def on_cookies_change(self, e):
         """Handle changes in any input field and trigger auto-save."""
@@ -178,10 +219,10 @@ class SettingsPage(PageBase):
         self.page.run_task(self.delay_handler.start_task_timer, self.save_accounts_after_delay, None)
         self.has_unsaved_changes['accounts_config'] = True
 
-    async def save_user_config_after_delay(self, delay):
+    async def save_default_config_after_delay(self, delay):
         await asyncio.sleep(delay)
-        if self.has_unsaved_changes['user_config']:
-            await self.config_manager.save_user_config(self.user_config)
+        if self.has_unsaved_changes['default_config']:
+            await self.config_manager.save_user_config(self.default_config)
 
     async def save_cookies_after_delay(self, delay):
         await asyncio.sleep(delay)
@@ -401,6 +442,7 @@ class SettingsPage(PageBase):
                         ),
                     ],
                 ),
+                self.create_speech_recognition_settings_group(),
             ],
             spacing=10,
             scroll=ft.ScrollMode.AUTO,
@@ -495,18 +537,24 @@ class SettingsPage(PageBase):
                                     self._["wechat"], ft.Icons.WECHAT, "wechat_enabled"
                                 ),
                                 self.create_channel_switch_container(
+                                    "企业微信", ft.Icons.BUSINESS, "wecom_enabled"
+                                ),
+                                self.create_channel_switch_container(
+                                    "飞书", ft.Icons.COMMENT, "feishu_enabled"
+                                ),
+                                self.create_channel_switch_container(
                                     self._["serverchan"], ft.Icons.CLOUD_OUTLINED, "serverchan_enabled"
                                 ),
-                                self.create_channel_switch_container(self._["email"], ft.Icons.EMAIL, "email_enabled"),
-                                self.create_channel_switch_container(
-                                    "Bark", ft.Icons.NOTIFICATIONS_ACTIVE, "bark_enabled"
-                                )
                             ],
                             alignment=ft.MainAxisAlignment.START,
                             spacing=12,
                         ),
                         ft.Row(
                             controls=[
+                                self.create_channel_switch_container(self._["email"], ft.Icons.EMAIL, "email_enabled"),
+                                self.create_channel_switch_container(
+                                    "Bark", ft.Icons.NOTIFICATIONS_ACTIVE, "bark_enabled"
+                                ),
                                 self.create_channel_switch_container("Ntfy", ft.Icons.NOTIFICATIONS, "ntfy_enabled"),
                                 self.create_channel_switch_container(
                                     self._["telegram"], ft.Icons.SMS, "telegram_enabled"),
@@ -563,6 +611,47 @@ class SettingsPage(PageBase):
                                         width=300,
                                         on_change=self.on_change,
                                         data="wechat_webhook_url",
+                                    ),
+                                ),
+                            ],
+                        ),
+                        self.create_channel_config(
+                            "企业微信",
+                            [
+                                self.create_setting_row(
+                                    "Webhook URL",
+                                    ft.TextField(
+                                        value=self.get_config_value("wecom_webhook_url"),
+                                        hint_text="请输入企业微信机器人的 Webhook URL",
+                                        width=300,
+                                        on_change=self.on_change,
+                                        data="wecom_webhook_url",
+                                    ),
+                                ),
+                            ],
+                        ),
+                        self.create_channel_config(
+                            "飞书",
+                            [
+                                self.create_setting_row(
+                                    "Webhook URL",
+                                    ft.TextField(
+                                        value=self.get_config_value("feishu_webhook_url"),
+                                        hint_text="请输入飞书机器人的 Webhook URL",
+                                        width=300,
+                                        on_change=self.on_change,
+                                        data="feishu_webhook_url",
+                                    ),
+                                ),
+                                self.create_setting_row(
+                                    "签名校验 Secret",
+                                    ft.TextField(
+                                        value=self.get_config_value("feishu_secret"),
+                                        hint_text="可选：飞书机器人的签名校验密钥",
+                                        width=300,
+                                        on_change=self.on_change,
+                                        data="feishu_secret",
+                                        password=True,
                                     ),
                                 ),
                             ],
@@ -1033,16 +1122,74 @@ class SettingsPage(PageBase):
                 self.page.run_task(self.on_change, e)
 
         async def pick_folder(_):
-            if self.app.page.web:
-                await self.app.snack_bar.show_snack_bar(self._["unsupported_select_path"])
-            folder_picker.get_directory_path()
+            if self.app.is_web:
+                # Web端使用文本输入对话框
+                await self.show_path_input_dialog(control)
+            else:
+                folder_picker.get_directory_path()
+
+        async def show_path_input_dialog(control):
+            path_input = ft.TextField(
+                label="请输入保存路径",
+                value=control.value,
+                width=400,
+                hint_text="例如: /home/user/videos 或 D:\\videos",
+                autofocus=True,
+            )
+
+            async def confirm_path(_):
+                new_path = path_input.value.strip()
+                if new_path:
+                    control.value = new_path
+                    control.update()
+                    # 模拟 FilePickerResultEvent
+                    class MockEvent:
+                        def __init__(self):
+                            self.control = type('obj', (object,), {'data': control.data})()
+                            self.data = new_path
+                    
+                    await self.on_change(MockEvent())
+                await close_dialog(_)
+
+            async def close_dialog(_):
+                path_dialog.open = False
+                path_dialog.update()
+
+            path_dialog = ft.AlertDialog(
+                title=ft.Text("选择保存路径"),
+                content=ft.Container(
+                    content=ft.Column([
+                        ft.Text("请输入视频保存的完整路径："),
+                        path_input,
+                        ft.Text("提示：Web端无法直接选择文件夹，请手动输入路径", 
+                               size=12, opacity=0.7),
+                    ], tight=True),
+                    width=450,
+                    height=150,
+                ),
+                actions=[
+                    ft.TextButton(text="取消", on_click=close_dialog),
+                    ft.TextButton(text="确认", on_click=confirm_path),
+                ],
+                actions_alignment=ft.MainAxisAlignment.END,
+                modal=True,
+            )
+
+            self.app.dialog_area.content = path_dialog
+            self.app.dialog_area.content.open = True
+            self.app.dialog_area.update()
+
+        self.show_path_input_dialog = show_path_input_dialog
 
         folder_picker = ft.FilePicker(on_result=picked_folder)
         self.page.overlay.append(folder_picker)
         self.page.update()
 
         btn_pick_folder = ft.ElevatedButton(
-            text=self._["select"], icon=ft.Icons.FOLDER_OPEN, on_click=pick_folder, tooltip=self._["select_btn_tip"]
+            text=self._["select"], 
+            icon=ft.Icons.FOLDER_OPEN, 
+            on_click=pick_folder, 
+            tooltip="桌面端：打开文件夹选择器；Web端：手动输入路径"
         )
         return ft.Row(
             [ft.Text(label, width=200, text_align=ft.TextAlign.RIGHT), control, btn_pick_folder],
@@ -1056,7 +1203,7 @@ class SettingsPage(PageBase):
 
         show_snack_bar = False
         save_methods = {
-            "user_config": (self.config_manager.save_user_config, self.user_config),
+            "default_config": (self.config_manager.save_user_config, self.default_config),
             "cookies_config": (self.config_manager.save_cookies_config, self.cookies_config),
             "accounts_config": (self.config_manager.save_accounts_config, self.accounts_config)
         }
@@ -1081,3 +1228,393 @@ class SettingsPage(PageBase):
 
         if self.app.current_page == self and e.ctrl and e.key == "S":
             self.page.run_task(self.is_changed)
+
+    def create_speech_recognition_settings_group(self):
+        """创建语音识别设置组"""
+        speech_provider_configs = {
+            "aliyun": self.create_aliyun_config_ui(),
+            "tencent": self.create_tencent_config_ui(),
+        }
+        
+        current_provider = self.get_config_value("speech_recognition_provider", "aliyun")
+        
+        # 语音识别提供商选择
+        speech_provider_dropdown = ft.Dropdown(
+            width=300,
+            label="语音识别服务商",
+            value=current_provider,
+            options=[
+                ft.dropdown.Option("aliyun", "阿里云语音识别"),
+                ft.dropdown.Option("tencent", "腾讯云语音识别"),
+            ],
+            on_change=self.on_speech_provider_change,
+            data="speech_recognition_provider"
+        )
+
+        return self.create_setting_group(
+            "语音识别设置",
+            "自动将录制视频转换为文字字幕",
+            [
+                self.create_setting_row(
+                    "启用语音识别",
+                    ft.Switch(
+                        value=self.get_config_value("speech_recognition_enabled", False),
+                        on_change=self.on_change,
+                        data="speech_recognition_enabled",
+                    ),
+                ),
+                self.create_setting_row(
+                    "自动处理",
+                    ft.Switch(
+                        value=self.get_config_value("speech_recognition_auto_process", True),
+                        on_change=self.on_change,
+                        data="speech_recognition_auto_process",
+                    ),
+                ),
+                self.create_setting_row(
+                    "识别语言",
+                    ft.Dropdown(
+                        options=[
+                            ft.dropdown.Option("zh", "中文"),
+                            ft.dropdown.Option("en", "英文"),
+                        ],
+                        value=self.get_config_value("speech_recognition_language", "zh"),
+                        width=200,
+                        on_change=self.on_change,
+                        data="speech_recognition_language",
+                    ),
+                ),
+                self.create_setting_row(
+                    "字幕格式",
+                    ft.Dropdown(
+                        options=[
+                            ft.dropdown.Option("srt", "SRT字幕"),
+                            ft.dropdown.Option("vtt", "WebVTT字幕"),
+                            ft.dropdown.Option("txt", "纯文本"),
+                        ],
+                        value=self.get_config_value("speech_recognition_format", "srt"),
+                        width=200,
+                        on_change=self.on_change,
+                        data="speech_recognition_format",
+                    ),
+                ),
+                self.create_setting_row(
+                    "服务商",
+                    speech_provider_dropdown,
+                ),
+                self.create_setting_row(
+                    "删除临时音频",
+                    ft.Switch(
+                        value=self.get_config_value("speech_recognition_delete_audio", True),
+                        on_change=self.on_change,
+                        data="speech_recognition_delete_audio",
+                    ),
+                ),
+                # OSS配置部分
+                self.create_oss_settings_group(),
+                # 动态显示当前服务商的配置
+                ft.Container(
+                    content=speech_provider_configs.get(current_provider, ft.Column()),
+                    data=f"provider_config_{current_provider}",
+                ),
+            ],
+        )
+    
+    def create_oss_settings_group(self):
+        """创建OSS设置组"""
+        oss_provider_configs = {
+            "aliyun": self.create_aliyun_oss_config_ui(),
+            "tencent": self.create_tencent_oss_config_ui(),
+        }
+        
+        current_oss_provider = self.get_config_value("oss_provider", "aliyun")
+        
+        # OSS提供商选择
+        oss_provider_dropdown = ft.Dropdown(
+            width=300,
+            label="OSS服务商",
+            value=current_oss_provider,
+            options=[
+                ft.dropdown.Option("aliyun", "阿里云OSS"),
+                ft.dropdown.Option("tencent", "腾讯云COS"),
+            ],
+            on_change=self.on_oss_provider_change,
+            data="oss_provider"
+        )
+
+        return ft.Column([
+            ft.Container(
+                content=ft.Text("OSS文件存储配置", weight=ft.FontWeight.BOLD, size=14),
+                margin=ft.margin.only(top=15, bottom=5)
+            ),
+            ft.Container(
+                content=ft.Text("语音识别需要将音频文件上传到云存储获取公开访问URL", size=12, color=ft.colors.GREY_600),
+                margin=ft.margin.only(bottom=10)
+            ),
+            self.create_setting_row(
+                "OSS服务商",
+                oss_provider_dropdown,
+            ),
+            # 动态显示当前OSS服务商的配置
+            ft.Container(
+                content=oss_provider_configs.get(current_oss_provider, ft.Column()),
+                data=f"oss_config_{current_oss_provider}",
+            ),
+        ])
+    
+    async def on_oss_provider_change(self, e):
+        """处理OSS服务商变更"""
+        # 直接保存配置，不使用延迟保存
+        key = e.control.data
+        new_value = e.data
+        self.default_config[key] = new_value
+        
+        # 立即保存配置
+        await self.config_manager.save_user_config(self.default_config)
+        self.has_unsaved_changes['default_config'] = False
+        
+        # 重新加载页面以更新UI
+        await self.load()
+
+    def create_aliyun_config_ui(self):
+        """创建阿里云语音识别配置UI"""
+        return ft.Column([
+            ft.Container(
+                content=ft.Text("阿里云语音识别 API 配置", weight=ft.FontWeight.BOLD),
+                margin=ft.margin.only(top=10, bottom=5)
+            ),
+            self.create_setting_row(
+                "Access Key ID",
+                ft.TextField(
+                    value=self.get_config_value("speech_recognition_aliyun_access_key_id", ""),
+                    width=300,
+                    on_change=self.on_change,
+                    data="speech_recognition_aliyun_access_key_id",
+                    password=True,
+                    hint_text="请输入阿里云 Access Key ID"
+                ),
+            ),
+            self.create_setting_row(
+                "Access Key Secret",
+                ft.TextField(
+                    value=self.get_config_value("speech_recognition_aliyun_access_key_secret", ""),
+                    width=300,
+                    on_change=self.on_change,
+                    data="speech_recognition_aliyun_access_key_secret",
+                    password=True,
+                    hint_text="请输入阿里云 Access Key Secret"
+                ),
+            ),
+            self.create_setting_row(
+                "App Key",
+                ft.TextField(
+                    value=self.get_config_value("speech_recognition_aliyun_app_key", ""),
+                    width=300,
+                    on_change=self.on_change,
+                    data="speech_recognition_aliyun_app_key",
+                    hint_text="请输入语音识别 App Key"
+                ),
+            ),
+        ])
+    
+    def create_tencent_config_ui(self):
+        """创建腾讯云语音识别配置UI"""
+        return ft.Column([
+            ft.Container(
+                content=ft.Text("腾讯云语音识别 API 配置", weight=ft.FontWeight.BOLD),
+                margin=ft.margin.only(top=10, bottom=5)
+            ),
+            ft.Container(
+                content=ft.Text("需要安装SDK: pip install tencentcloud-sdk-python-asr==3.0.1394", 
+                               size=12, color=ft.colors.GREY_600),
+                margin=ft.margin.only(bottom=10)
+            ),
+            self.create_setting_row(
+                "Secret ID",
+                ft.TextField(
+                    value=self.get_config_value("speech_recognition_tencent_secret_id", ""),
+                    width=300,
+                    on_change=self.on_change,
+                    data="speech_recognition_tencent_secret_id",
+                    password=True,
+                    hint_text="请输入腾讯云 Secret ID"
+                ),
+            ),
+            self.create_setting_row(
+                "Secret Key",
+                ft.TextField(
+                    value=self.get_config_value("speech_recognition_tencent_secret_key", ""),
+                    width=300,
+                    on_change=self.on_change,
+                    data="speech_recognition_tencent_secret_key",
+                    password=True,
+                    hint_text="请输入腾讯云 Secret Key"
+                ),
+            ),
+            self.create_setting_row(
+                "Region",
+                ft.TextField(
+                    value=self.get_config_value("speech_recognition_tencent_region", ""),
+                    width=300,
+                    on_change=self.on_change,
+                    data="speech_recognition_tencent_region",
+                    hint_text="可选，如: ap-beijing (留空则使用默认)"
+                ),
+            ),
+            self.create_setting_row(
+                "引擎模型(中文)",
+                ft.TextField(
+                    value=self.get_config_value("speech_recognition_tencent_engine_model_type_zh", "16k_zh"),
+                    width=300,
+                    on_change=self.on_change,
+                    data="speech_recognition_tencent_engine_model_type_zh",
+                    hint_text="默认: 16k_zh"
+                ),
+            ),
+            self.create_setting_row(
+                "引擎模型(英文)",
+                ft.TextField(
+                    value=self.get_config_value("speech_recognition_tencent_engine_model_type_en", "16k_en"),
+                    width=300,
+                    on_change=self.on_change,
+                    data="speech_recognition_tencent_engine_model_type_en",
+                    hint_text="默认: 16k_en"
+                ),
+            ),
+            self.create_setting_row(
+                "最大等待时间(秒)",
+                ft.TextField(
+                    value=str(self.get_config_value("speech_recognition_tencent_max_wait_time", 300)),
+                    width=100,
+                    on_change=self.on_change,
+                    data="speech_recognition_tencent_max_wait_time",
+                    hint_text="默认: 300"
+                ),
+            ),
+            self.create_setting_row(
+                "轮询间隔(秒)",
+                ft.TextField(
+                    value=str(self.get_config_value("speech_recognition_tencent_poll_interval", 5)),
+                    width=100,
+                    on_change=self.on_change,
+                    data="speech_recognition_tencent_poll_interval",
+                    hint_text="默认: 5"
+                ),
+            ),
+        ])
+
+    def create_aliyun_oss_config_ui(self):
+        """创建阿里云OSS配置UI"""
+        return ft.Column([
+            ft.Container(
+                content=ft.Text("阿里云OSS配置", weight=ft.FontWeight.BOLD),
+                margin=ft.margin.only(top=10, bottom=5)
+            ),
+            self.create_setting_row(
+                "Access Key ID",
+                ft.TextField(
+                    value=self.get_config_value("oss_aliyun_access_key_id", ""),
+                    width=300,
+                    on_change=self.on_change,
+                    data="oss_aliyun_access_key_id",
+                    password=True,
+                    hint_text="请输入阿里云 Access Key ID"
+                ),
+            ),
+            self.create_setting_row(
+                "Access Key Secret",
+                ft.TextField(
+                    value=self.get_config_value("oss_aliyun_access_key_secret", ""),
+                    width=300,
+                    on_change=self.on_change,
+                    data="oss_aliyun_access_key_secret",
+                    password=True,
+                    hint_text="请输入阿里云 Access Key Secret"
+                ),
+            ),
+            self.create_setting_row(
+                "Endpoint",
+                ft.TextField(
+                    value=self.get_config_value("oss_aliyun_endpoint", ""),
+                    width=300,
+                    on_change=self.on_change,
+                    data="oss_aliyun_endpoint",
+                    hint_text="如: oss-cn-hangzhou.aliyuncs.com"
+                ),
+            ),
+            self.create_setting_row(
+                "Bucket Name",
+                ft.TextField(
+                    value=self.get_config_value("oss_aliyun_bucket_name", ""),
+                    width=300,
+                    on_change=self.on_change,
+                    data="oss_aliyun_bucket_name",
+                    hint_text="OSS存储桶名称"
+                ),
+            ),
+        ])
+
+    def create_tencent_oss_config_ui(self):
+        """创建腾讯云COS配置UI"""
+        return ft.Column([
+            ft.Container(
+                content=ft.Text("腾讯云COS配置", weight=ft.FontWeight.BOLD),
+                margin=ft.margin.only(top=10, bottom=5)
+            ),
+            self.create_setting_row(
+                "Secret ID",
+                ft.TextField(
+                    value=self.get_config_value("oss_tencent_secret_id", ""),
+                    width=300,
+                    on_change=self.on_change,
+                    data="oss_tencent_secret_id",
+                    password=True,
+                    hint_text="请输入腾讯云 Secret ID"
+                ),
+            ),
+            self.create_setting_row(
+                "Secret Key",
+                ft.TextField(
+                    value=self.get_config_value("oss_tencent_secret_key", ""),
+                    width=300,
+                    on_change=self.on_change,
+                    data="oss_tencent_secret_key",
+                    password=True,
+                    hint_text="请输入腾讯云 Secret Key"
+                ),
+            ),
+            self.create_setting_row(
+                "Region",
+                ft.TextField(
+                    value=self.get_config_value("oss_tencent_region", ""),
+                    width=300,
+                    on_change=self.on_change,
+                    data="oss_tencent_region",
+                    hint_text="如: ap-beijing"
+                ),
+            ),
+            self.create_setting_row(
+                "Bucket Name",
+                ft.TextField(
+                    value=self.get_config_value("oss_tencent_bucket_name", ""),
+                    width=300,
+                    on_change=self.on_change,
+                    data="oss_tencent_bucket_name",
+                    hint_text="COS存储桶名称"
+                ),
+            ),
+        ])
+
+    async def on_speech_provider_change(self, e):
+        """处理语音识别服务商变更"""
+        # 直接保存配置，不使用延迟保存
+        key = e.control.data
+        new_value = e.data
+        self.default_config[key] = new_value
+        
+        # 立即保存配置
+        await self.config_manager.save_user_config(self.default_config)
+        self.has_unsaved_changes['default_config'] = False
+        
+        # 重新加载页面以更新UI
+        await self.load()

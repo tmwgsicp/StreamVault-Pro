@@ -157,12 +157,12 @@ class InstallationManager:
         await self.install_components()
 
     async def on_dont_show_again(self, e):
-        user_config = self.app.settings.user_config
-        user_config["hide_install_dialog"] = e.control.value
-        await self.app.config_manager.save_user_config(user_config)
+        default_config = self.app.settings.default_config
+        default_config["hide_install_dialog"] = e.control.value
+        await self.app.config_manager.save_user_config(default_config)
 
     async def check_env(self):
-        if not self.app.settings.user_config.get("hide_install_dialog", False):
+        if not self.app.settings.default_config.get("hide_install_dialog", False):
             await self.get_install_components()
             if self.components_to_install:
                 logger.info(f"Missing components: {[i['name'] for i in self.components_to_install]}")

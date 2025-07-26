@@ -1,42 +1,59 @@
+version: '3.8'
 
 services:
-  streamcap:
-    image: ihmily/streamcap
-    tty: true
+  streamvault-pro:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: tmwgsicp/streamvault-pro:latest
+    container_name: streamvault-pro
+    restart: unless-stopped
+    
     ports:
-      - "${PORT:-6006}:${PORT:-6006}"
-    environment:
-      - PORT=${PORT:-6006}
-      - TZ=${TZ:-Asia/Shanghai}
+      - "8080:8080"
+    
     volumes:
-      - ./logs:/app/logs
-      - ./config:/app/config
-      - ./downloads:/app/downloads
-      - ./.env:/app/.env
+      - ./downloads:/home/streamvault/app/downloads
+      - ./config:/home/streamvault/app/config
+      - ./logs:/home/streamvault/app/logs
+    
+    environment:
+      - PLATFORM=web
+      - HOST=0.0.0.0
+      - PORT=8080
+      - TZ=Asia/Shanghai
+    
+    env_file:
+      - .env
+    
     healthcheck:
-      test: ["CMD", "sh", "-c", "curl -f http://localhost:${PORT:-6006}/about"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 30s
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '1.0'
+        reservations:
+          memory: 512M
+          cpus: '0.5'
+    
+    # Security settings
+    security_opt:
+      - no-new-privileges:true
+    
+    # Network configuration
     networks:
-      - streamcap-network
-
-  video_api:
-      image: ihmily/streamcap
-      command: python -m app.api.video_stream_service
-      ports:
-        - "${VIDEO_API_PORT:-6007}:${VIDEO_API_PORT:-6007}"
-      environment:
-        - TZ=${TZ:-Asia/Shanghai}
-        - CUSTOM_VIDEO_ROOT_DIR=${CUSTOM_VIDEO_ROOT_DIR:-./downloads}
-      volumes:
-        - ./downloads:/app/downloads
-        - ./.env:/app/.env
-      depends_on:
-        - streamcap
-      networks:
-        - streamcap-network
+      - streamvault-network
 
 networks:
-  streamcap-network:
+  streamvault-network:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

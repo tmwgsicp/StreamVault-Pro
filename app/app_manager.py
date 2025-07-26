@@ -16,14 +16,17 @@ from .ui.views.about_view import AboutPage
 from .ui.views.home_view import HomePage
 from .ui.views.settings_view import SettingsPage
 from .ui.views.storage_view import StoragePage
+from .ui.views.transcripts_view import TranscriptsPage
+from .ui.views.license_view import LicenseView
 from .utils import utils
 from .utils.logger import logger
 
 
 class App:
-    def __init__(self, page: ft.Page):
+    def __init__(self, page: ft.Page, is_web: bool = False):
         self.install_progress = None
         self.page = page
+        self.is_web = is_web
         self.run_path = execute_dir
         self.assets_dir = os.path.join(execute_dir, "assets")
         self.process_manager = AsyncProcessManager()
@@ -75,6 +78,8 @@ class App:
             "settings": self.settings,
             "home": HomePage(self),
             "storage": StoragePage(self),
+            "transcripts": TranscriptsPage(self),
+            "license": LicenseView(self),
             "about": AboutPage(self),
         }
 
@@ -90,6 +95,8 @@ class App:
                 await self.settings.is_changed()
                 self.current_page = page
                 await page.load()
+        except Exception as e:
+            logger.error(f"Error switching to page {page_name}: {e}")
         finally:
             self._loading_page = False
 
@@ -114,14 +121,14 @@ class App:
             if not self.update_checker.update_config["auto_check"]:
                 return
                 
-            last_check_time = self.settings.user_config.get("last_update_check", 0)
+            last_check_time = self.settings.default_config.get("last_update_check", 0)
             current_time = time.time()
             check_interval = self.update_checker.update_config["check_interval"]
             
             if current_time - last_check_time >= check_interval:
                 update_info = await self.update_checker.check_for_updates()
-                self.settings.user_config["last_update_check"] = current_time
-                await self.config_manager.save_user_config(self.settings.user_config)
+                self.settings.default_config["last_update_check"] = current_time
+                await self.config_manager.save_user_config(self.settings.default_config)
 
                 if update_info.get("has_update", False):
                     await self.update_checker.show_update_dialog(update_info)
