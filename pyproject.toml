@@ -1,0 +1,108 @@
+[project]
+name = "StreamVault-Pro"
+version = "2.0.0"
+description = "Professional Live Stream Recording and Management Platform with Advanced Features"
+authors = [
+    { name = "tmwgsicp", email = "tmwgsicp@outlook.com" }
+]
+license = {text = "Apache-2.0"}
+readme = "README.md"
+homepage = "https://github.com/tmwgsicp/StreamVault-Pro"
+repository = "https://github.com/tmwgsicp/StreamVault-Pro"
+keywords = ["live-streaming", "video-recording", "ffmpeg", "streaming", "professional", "enterprise"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: End Users/Desktop",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Multimedia :: Video :: Capture",
+    "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+]
+requires-python = ">=3.10,<4.0"
+
+dependencies = [
+    "flet[desktop,cli]==0.27.6",
+    "flet-video==0.1.0",
+    "httpx[http2]>=0.28.1",
+    "screeninfo>=0.8.1",
+    "aiofiles>=24.1.0",
+    "streamget>=4.0.5",
+    "python-dotenv>=1.0.1",
+    "cachetools>=5.5.2",
+]
+
+[project.urls]
+Documentation = "https://github.com/tmwgsicp/StreamVault-Pro/wiki"
+Homepage = "https://github.com/tmwgsicp/StreamVault-Pro"
+Repository = "https://github.com/tmwgsicp/StreamVault-Pro"
+Source = "https://github.com/tmwgsicp/StreamVault-Pro"
+"Bug Reports" = "https://github.com/tmwgsicp/StreamVault-Pro/issues"
+"Feature Requests" = "https://github.com/tmwgsicp/StreamVault-Pro/discussions"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.flet]
+org = "io.github.tmwgsicp.streamvault"
+product = "StreamVault Pro"
+company = "io.github.tmwgsicp.streamvault"
+copyright = "Copyright (C) 2025 by tmwgsicp"
+compile.app = false
+compile.packages = false
+compile.cleanup = true
+
+[tool.flet.app]
+path ="."
+
+[tool.poetry]
+package-mode = false
+packages = [
+    { include = "app", from = "." },
+]
+
+[tool.poetry.dependencies]
+flet = { version = "0.27.6", extras = ["desktop", "cli"] }
+flet-video = "^0.1.0"
+httpx = "^0.28.1"
+screeninfo = "~0.8.1"
+aiofiles = "~24.1.0"
+streamget = ">=4.0.5"
+python-dotenv = "~1.1.0"
+cachetools = "~5.5.2"
+
+[tool.poetry.group.dev]
+optional = true
+
+[tool.poetry.group.dev.dependencies]
+ruff = "~0.11.2"
+mypy = "^1.8.0"
+pytest = "^7.4.0"
+pytest-asyncio = "^0.21.0"
+black = "^23.0.0"
+
+[tool.poetry.group.lint]
+optional = true
+
+[tool.poetry.group.lint.dependencies]
+ruff = "~0.11.2"
+
+[tool.ruff]
+target-version = "py310"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "N", "B", "C4", "UP"]
+ignore = ["E501", "N806", "N803"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true

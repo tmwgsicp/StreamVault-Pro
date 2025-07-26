@@ -1,0 +1,195 @@
+name: ✨ Feature Request | 功能建议
+description: Suggest a new feature for StreamVault Pro | 为StreamVault Pro建议新功能
+title: "[Feature] "
+labels: ["enhancement", "feature-request"]
+assignees: ["tmwgsicp"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢您提出功能建议！这有助于我们改进StreamVault Pro，为用户提供更好的体验。
+        Thank you for suggesting a feature! This helps us improve StreamVault Pro and provide a better experience for users.
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: 📋 检查清单 | Checklist
+      description: 请确认您已经完成以下步骤 | Please confirm you have completed the following steps
+      options:
+        - label: 我已搜索现有的Issues和Discussions，确认这是一个新建议 | I have searched existing issues and discussions and confirmed this is a new suggestion
+          required: true
+        - label: 我已查看项目路线图和文档 | I have checked the project roadmap and documentation
+          required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 🎯 问题描述 | Problem Description
+      description: 这个功能是为了解决什么问题？| What problem does this feature solve?
+      placeholder: |
+        例如：当录制多个直播间时，我经常需要手动管理录制文件...
+        e.g., When recording multiple live streams, I often need to manually manage recorded files...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: 💡 建议的解决方案 | Proposed Solution
+      description: 描述您想要的功能 | Describe the feature you'd like
+      placeholder: |
+        例如：希望能够自动根据直播间名称创建文件夹，并按日期组织录制文件...
+        e.g., I would like automatic folder creation based on stream names and organize recorded files by date...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 🔄 替代方案 | Alternative Solutions
+      description: 您是否考虑过其他解决方案？| Have you considered any alternative solutions?
+      placeholder: |
+        例如：目前我使用手动重命名的方式，但这很繁琐...
+        e.g., Currently I use manual renaming, but it's tedious...
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: 📂 功能类别 | Feature Category
+      description: 这个功能属于哪个类别？| Which category does this feature belong to?
+      options:
+        - 录制功能 | Recording Features
+        - 用户界面 | User Interface
+        - 文案管理 | Transcript Management
+        - 平台支持 | Platform Support
+        - 系统集成 | System Integration
+        - 性能优化 | Performance Optimization
+        - 安全性 | Security
+        - API/集成 | API/Integration
+        - 其他 | Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: user_type
+    attributes:
+      label: 👤 用户类型 | User Type
+      description: 这个功能主要针对哪类用户？| Which type of users is this feature mainly for?
+      options:
+        - 个人用户 | Individual Users
+        - 内容创作者 | Content Creators
+        - 小型团队 | Small Teams
+        - 企业用户 | Enterprise Users
+        - 开发者 | Developers
+        - 所有用户 | All Users
+    validations:
+      required: true
+
+  - type: textarea
+    id: use_cases
+    attributes:
+      label: 🎬 使用场景 | Use Cases
+      description: 详细描述这个功能的使用场景 | Describe in detail the use cases for this feature
+      placeholder: |
+        1. 作为内容创作者，我希望...
+        2. 当管理多个直播间时...
+        3. 在分析录制数据时...
+      value: |
+        1. 
+        2. 
+        3. 
+    validations:
+      required: true
+
+  - type: textarea
+    id: benefits
+    attributes:
+      label: 🌟 预期收益 | Expected Benefits
+      description: 这个功能会带来什么好处？| What benefits would this feature bring?
+      placeholder: |
+        例如：
+        - 提高工作效率50%
+        - 减少手动操作
+        - 改善用户体验
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 🚨 优先级 | Priority
+      description: 您认为这个功能的优先级如何？| How would you rate the priority of this feature?
+      options:
+        - 低 - 有了更好 | Low - Nice to have
+        - 中 - 比较重要 | Medium - Fairly important
+        - 高 - 很重要 | High - Very important
+        - 紧急 - 必须有 | Critical - Must have
+      default: 1
+
+  - type: dropdown
+    id: complexity
+    attributes:
+      label: 🔧 实现复杂度 | Implementation Complexity
+      description: 您认为实现这个功能有多复杂？| How complex do you think implementing this feature would be?
+      options:
+        - 简单 - 小的UI改动 | Simple - Minor UI changes
+        - 中等 - 需要一些开发工作 | Medium - Requires some development work
+        - 复杂 - 需要重大更改 | Complex - Requires major changes
+        - 不确定 | Not sure
+      default: 3
+
+  - type: textarea
+    id: mockups
+    attributes:
+      label: 🎨 界面设计 | UI Mockups
+      description: 如果涉及界面更改，请描述或提供设计图 | If UI changes are involved, please describe or provide mockups
+      placeholder: |
+        描述界面设计或拖拽设计图到这里...
+        Describe the UI design or drag mockup images here...
+
+  - type: textarea
+    id: technical_details
+    attributes:
+      label: ⚙️ 技术细节 | Technical Details
+      description: 如果您有技术背景，请提供实现建议 | If you have technical background, please provide implementation suggestions
+      placeholder: |
+        例如：可以使用某个API、添加新的配置选项等...
+        e.g., Could use a specific API, add new configuration options, etc...
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: 🤝 贡献意愿 | Contribution Willingness
+      description: 您是否愿意参与实现这个功能？| Are you willing to contribute to implementing this feature?
+      options:
+        - label: 我愿意提供更多需求细节 | I'm willing to provide more requirement details
+          required: false
+        - label: 我愿意参与测试 | I'm willing to participate in testing
+          required: false
+        - label: 我愿意提供代码贡献 | I'm willing to contribute code
+          required: false
+        - label: 我愿意提供资金支持 | I'm willing to provide financial support
+          required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: 📝 其他信息 | Additional Information
+      description: 其他任何相关信息 | Any other relevant information
+      placeholder: |
+        例如：参考项目、相关链接、具体需求等...
+        e.g., Reference projects, related links, specific requirements, etc...
+
+  - type: dropdown
+    id: license_tier
+    attributes:
+      label: 📦 许可证层级 | License Tier
+      description: 您认为这个功能应该在哪个许可证层级提供？| Which license tier should this feature be available in?
+      options:
+        - 试用版 | Trial Edition
+        - 专业版 | Professional Edition
+        - 企业版 | Enterprise Edition
+        - 所有版本 | All Editions
+        - 不确定 | Not sure
+      default: 4 
