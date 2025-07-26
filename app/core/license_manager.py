@@ -173,7 +173,7 @@ class LicenseManager:
         # 将数据转换为字符串并排序
         data_str = json.dumps(data, sort_keys=True)
         # 添加盐值
-        salted_data = f"streamcap_{data_str}_license"
+        salted_data = f"streamvault_{data_str}_license"
         # 生成SHA256哈希
         return hashlib.sha256(salted_data.encode()).hexdigest()
     

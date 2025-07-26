@@ -14,12 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 🚀 重大更新 | Major Updates
 
 #### 添加 | Added
-- **项目重新品牌化**: 从 StreamCap 二开版更名为 StreamVault Pro
-- **商业化支持**: 新增多种商业许可选项（试用版、专业版、企业版）
+- **项目重新品牌化**: 更名为 StreamVault Pro
 - **现代化Logo设计**: 全新的品牌标识和视觉设计
-- **增强的许可证系统**: 支持企业级功能控制和管理
-- **专业技术支持**: 提供商业用户专业技术支持服务
-- **定制开发服务**: 为企业用户提供定制化解决方案
+- **代码库清理**: 移除敏感信息，为开源发布做准备
+- **完整文档体系**: 全面的README、贡献指南、发布指南
+- **开源社区支持**: 专注于开源社区驱动的发展
 
 #### 改进 | Improved
 - **文档体系重构**: 全面重写README和项目文档
@@ -30,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### 修复 | Fixed
 - **兼容性问题**: 修复与最新Flet版本的兼容性问题
 - **稳定性改进**: 提升应用整体稳定性和性能表现
+- **安全性增强**: 清理敏感信息，提高代码安全性
 
 ## [1.1.0] - 2024-12-15
 
@@ -47,12 +47,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - 智能时间信息显示（添加时间、最后录制时间）
   - 友好的数据格式化（时长、速度、文件大小）
   - 现代化卡片设计（阴影效果、圆角边框、芯片标签）
-
-- **🔐 许可证系统**
-  - 集成商业化许可证管理系统
-  - 支持多种许可证类型（试用版、专业版、企业版）
-  - 机器绑定功能，防止许可证滥用
-  - 根据许可证类型进行功能权限控制
 
 #### 改进 | Improved
 - **主界面管理优化**
@@ -104,7 +98,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 基于Flet框架构建现代化UI
 - 集成FFmpeg进行高质量录制
 - 使用StreamGet库处理多平台流媒体
-- 支持Docker容器化部署
 
 ---
 
@@ -129,7 +122,7 @@ We follow semantic versioning:
 
 - 当前版本和前一个主版本提供完整支持
 - 安全补丁会向后兼容至少两个主版本
-- 商业用户享受优先技术支持
+- 社区用户享受开源社区支持
 
 ---
 
@@ -138,7 +131,6 @@ We follow semantic versioning:
 - [项目主页](https://github.com/tmwgsicp/StreamVault-Pro)
 - [问题反馈](https://github.com/tmwgsicp/StreamVault-Pro/issues)
 - [功能建议](https://github.com/tmwgsicp/StreamVault-Pro/discussions)
-- [原项目地址](https://github.com/ihmily/StreamCap)
 
 感谢所有贡献者的支持！🙏
 Thanks to all contributors for their support! 🙏 

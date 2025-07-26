@@ -319,7 +319,7 @@ class LicenseView(PageBase):
         """打开购买页面"""
         import webbrowser
         try:
-            webbrowser.open("https://github.com/ihmily/StreamCap")
+            webbrowser.open("https://github.com/tmwgsicp/StreamVault-Pro")
             await self.show_success(self._.get("purchase_page_opened", "购买页面已在浏览器中打开"))
         except Exception as ex:
             await self.show_error(f"打开购买页面失败: {ex}")

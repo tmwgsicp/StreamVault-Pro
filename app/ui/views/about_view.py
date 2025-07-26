@@ -238,12 +238,12 @@ class AboutPage(PageBase):
 
     @staticmethod
     async def open_update_page(_):
-        url = "https://github.com/tmwgsicp/StreamCap/releases"
+        url = "https://github.com/tmwgsicp/StreamVault-Pro/releases"
         webbrowser.open(url)
 
     @staticmethod
     async def open_dos_page(_):
-        url = "https://github.com/tmwgsicp/StreamCap/wiki"
+        url = "https://github.com/tmwgsicp/StreamVault-Pro/wiki"
         webbrowser.open(url)
 
     async def on_keyboard(self, e: ft.KeyboardEvent):

@@ -3,7 +3,6 @@ name = "StreamVault-Pro"
 version = "2.0.0"
 description = "Professional Live Stream Recording and Management Platform with Advanced Features"
 authors = [
-    { name = "Hmily", email = "ihmily@outlook.com" },
     { name = "tmwgsicp", email = "tmwgsicp@outlook.com" }
 ]
 license = {text = "Apache-2.0"}
@@ -44,8 +43,6 @@ Repository = "https://github.com/tmwgsicp/StreamVault-Pro"
 Source = "https://github.com/tmwgsicp/StreamVault-Pro"
 "Bug Reports" = "https://github.com/tmwgsicp/StreamVault-Pro/issues"
 "Feature Requests" = "https://github.com/tmwgsicp/StreamVault-Pro/discussions"
-"Original Project" = "https://github.com/ihmily/StreamCap"
-"Commercial License" = "mailto:tmwgsicp@outlook.com"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -55,7 +52,7 @@ build-backend = "poetry.core.masonry.api"
 org = "io.github.tmwgsicp.streamvault"
 product = "StreamVault Pro"
 company = "io.github.tmwgsicp.streamvault"
-copyright = "Copyright (C) 2025 by tmwgsicp & Hmily"
+copyright = "Copyright (C) 2025 by tmwgsicp"
 compile.app = false
 compile.packages = false
 compile.cleanup = true
