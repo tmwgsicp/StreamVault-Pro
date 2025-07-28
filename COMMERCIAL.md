@@ -1,216 +1,131 @@
-# 💼 商业化服务说明 | Commercial Services
+# StreamVault Pro 商业化服务
 
-> **注意**: 本文档介绍的是基于 StreamVault Pro 开源项目的商业化服务选项。开源版本本身完全免费，包含所有核心功能。以下商业化服务为有特殊需求的用户提供额外支持和定制化解决方案。
+## 📋 重要说明
 
-> **Note**: This document describes commercial service options based on the StreamVault Pro open-source project. The open-source version itself is completely free and includes all core features. The following commercial services provide additional support and customized solutions for users with special needs.
+**StreamVault Pro 是一款商业软件产品。**本页面介绍我们的商业化服务选项，所有服务均为可选购买项目。
 
-StreamVault Pro 在保持开源免费的基础上，为不同规模的用户和企业提供可选的商业化服务和专业技术支持。
+---
 
-StreamVault Pro maintains its open-source and free nature while offering optional commercial services and professional technical support for users and enterprises of all sizes.
+## 💰 产品定价
 
-## 🆓 开源版本 | Open Source Version
-
+### 🆓 试用版 (免费15天)
 **完全免费，功能齐全**
-**Completely free with full features**
 
-✅ **包含功能 | Included Features:**
-- 所有核心录制功能（无限制直播间监控）
-- 支持40+主流直播平台
-- 智能文案管理系统
-- 高级搜索和筛选功能
-- 批量操作和导出
-- 多种输出格式支持
-- 定时任务和自动化
-- 现代化用户界面
-- 社区技术支持
+**核心功能**:
+- ✅ 支持5个直播间同时监控
+- ✅ 基础录制和转码功能
+- ✅ 标准文案管理系统
+- ✅ 跨平台支持 (Windows/macOS/Linux/Web)
+- ✅ 多格式输出 (ts/flv/mkv/mp4)
+- ✅ 邮件技术支持
 
-**适用对象 | Target Users:**
-所有用户 - 个人、创作者、工作室、企业
+**适合用户**: 个人用户、小型工作室试用评估
 
 ---
 
-## 💼 商业化服务选项 | Commercial Service Options
+### 💎 专业版 (¥299/月)
+**面向专业创作者和中小团队**
 
-以下服务为有特殊需求的用户提供额外支持：
+**包含试用版所有功能，另外增加**:
+- ✅ 支持50个直播间监控
+- ✅ 高级AI文案分析和智能标签
+- ✅ 云端存储集成 (阿里云/腾讯云/AWS)
+- ✅ RESTful API接口访问
+- ✅ 高级搜索和批量操作
+- ✅ 优先邮件和在线客服支持
+- ✅ 月度功能更新
 
-### 🎨 定制开发服务 | Custom Development Services
-
-**根据特定需求开发定制功能**
-**Develop custom features based on specific requirements**
-
-- 新平台接入开发
-- 特殊格式支持
-- 自定义录制逻辑
-- 专用管理界面
-- 第三方系统集成
-- API接口开发
-
-**价格 | Pricing:** ¥500-2000/天 | $80-300/day
-
-### 🏗️ 系统集成服务 | System Integration Services
-
-**将StreamVault Pro集成到现有系统中**
-**Integrate StreamVault Pro into existing systems**
-
-- 企业级部署方案
-- 数据库集成
-- 用户系统对接
-- 工作流自动化
-- 监控告警系统
-- 高可用架构设计
-
-**价格 | Pricing:** 按项目报价 | Quote by project
-
-### 🌐 私有化部署服务 | Private Deployment Services
-
-**为企业提供完整的私有化部署方案**
-**Provide complete private deployment solutions for enterprises**
-
-- 服务器环境配置
-- 容器化部署
-- 负载均衡配置
-- 数据安全加固
-- 运维培训服务
-- 性能优化调优
-
-**价格 | Pricing:** ¥10,000起 | Starting from $1,500
+**适合用户**: 专业主播、中型MCN机构、内容创作团队
 
 ---
 
-## 🛠️ 技术支持服务 | Technical Support Services
+### 🏢 企业版 (¥999/月)
+**面向大型机构和企业客户**
 
-### 📧 优先技术支持 | Priority Technical Support
+**包含专业版所有功能，另外增加**:
+- ✅ 无限制直播间监控
+- ✅ 多用户协作和权限管理
+- ✅ 企业级API和Webhook集成
+- ✅ 高级数据分析和报表功能
+- ✅ 定制化工作流程
+- ✅ 7×24小时专属技术支持
+- ✅ 季度产品咨询和培训
+- ✅ 优先功能定制开发
 
-**为商业用户提供优先支持**
-**Provide priority support for commercial users**
-
-- 工作日24小时内响应
-- 专业技术问题解答
-- 配置指导服务
-- 最佳实践建议
-- 远程技术协助
-
-**价格 | Pricing:** ¥2,000/年 | $300/year
-
-### 📞 专属技术顾问 | Dedicated Technical Consultant
-
-**企业级专属技术顾问服务**
-**Enterprise-level dedicated technical consultant service**
-
-- 7x24小时技术支持
-- 专属技术顾问
-- 定期健康检查
-- 性能监控服务
-- 现场技术服务
-
-**价格 | Pricing:** ¥20,000/年 | $3,000/year
+**适合用户**: 大型MCN机构、游戏公司、企业客户
 
 ---
 
-## 🏆 增值服务 | Value-Added Services
+## 🔧 商业化服务选项
 
-### 📚 培训服务 | Training Services
+### 定制开发服务
+- **功能定制**: 根据特殊需求开发专属功能模块
+- **界面定制**: 品牌化界面和用户体验定制
+- **集成开发**: 与现有系统深度集成开发
+- **性能优化**: 针对大规模使用场景的性能优化
 
-**为团队提供专业培训**
-**Provide professional training for teams**
+### 系统集成服务
+- **API对接**: 与CRM、OA、CMS等系统无缝对接
+- **数据迁移**: 从其他系统迁移历史数据
+- **流程优化**: 优化现有工作流程和操作习惯
+- **培训服务**: 专业的用户培训和技能认证
 
-- 产品使用培训
-- 最佳实践分享
-- 高级功能讲解
-- 问题排查技巧
-- 运维管理培训
+### 私有化部署服务
+- **本地部署**: 企业内网环境部署和配置
+- **云端部署**: 私有云或公有云环境部署
+- **安全加固**: 企业级安全策略和权限配置
+- **运维支持**: 长期运维和技术支持服务
 
-**价格 | Pricing:** ¥2,000/天 | $300/day
-
-### 🔒 安全审计服务 | Security Audit Services
-
-**确保系统安全合规**
-**Ensure system security compliance**
-
-- 安全配置检查
-- 漏洞评估分析
-- 合规性审计
-- 安全加固建议
-- 定期安全评估
-
-**价格 | Pricing:** ¥5,000起 | Starting from $800
-
-### 📊 性能优化服务 | Performance Optimization Services
-
-**提升系统运行效率**
-**Improve system operational efficiency**
-
-- 性能瓶颈分析
-- 系统优化建议
-- 配置参数调优
-- 监控方案设计
-- 容量规划服务
-
-**价格 | Pricing:** ¥3,000起 | Starting from $500
+### 技术支持服务
+- **应急响应**: 关键问题的快速响应和处理
+- **版本升级**: 优先获得新版本和功能更新
+- **技术咨询**: 产品使用和业务优化建议
+- **远程协助**: 远程技术支持和问题排查
 
 ---
 
-## 📞 联系方式 | Contact Information
+## 📞 商业咨询
 
-### 💬 商业咨询 | Business Consultation
+### 销售咨询
+- **邮箱**: sales@streamvault.pro
+- **电话**: +86 400-xxx-xxxx
+- **微信**: StreamVault_Sales
 
-**邮箱 | Email:** tmwgsicp@outlook.com  
-**主题 | Subject:** StreamVault Pro 商业服务咨询 | Commercial Services Inquiry
-
-请提供以下信息 | Please provide the following information:
-- 服务类型 | Service type
-- 项目规模 | Project scale
-- 预算范围 | Budget range
-- 时间要求 | Timeline requirements
-- 特殊需求 | Special requirements
-
-### 🔧 技术支持 | Technical Support
-
-**开源版本支持 | Open Source Support:**
-- GitHub Issues: https://github.com/tmwgsicp/StreamVault-Pro/issues
-- GitHub Discussions: https://github.com/tmwgsicp/StreamVault-Pro/discussions
-
-**商业服务支持 | Commercial Services Support:**
-- 邮箱 | Email: commercial@streamvault-pro.com
+### 技术支持  
+- **邮箱**: support@streamvault.pro
+- **在线客服**: https://support.streamvault.pro
+- **技术文档**: https://docs.streamvault.pro
 
 ---
 
-## 📋 服务条款 | Terms of Service
+## 💼 服务保障
 
-### 💰 付款条款 | Payment Terms
+### 服务承诺
+- **稳定性保证**: 99.9%服务可用性承诺
+- **数据安全**: 企业级数据加密和备份
+- **隐私保护**: 严格遵守数据隐私保护法规
+- **持续更新**: 定期功能更新和安全补丁
 
-- 定制开发服务支持预付款
-- 支持多种付款方式（银行转账、PayPal、支付宝）
-- 长期服务可分期付款
-- 所有价格均不含税费
-
-### 🔄 服务保障 | Service Guarantee
-
-- 7天免费试用期（适用于支持服务）
-- 30天质量保证期
-- 服务不满意可协商调整
-- 提供详细的服务报告
-
-### 📜 知识产权 | Intellectual Property
-
-- 开源版本遵循Apache 2.0协议
-- 定制开发的代码归客户所有
-- 通用改进可回馈开源社区
-- 保护客户商业机密
+### 知识产权
+- **软件著作权**: 拥有完整的软件著作权和知识产权
+- **商标保护**: StreamVault Pro为注册商标
+- **技术专利**: 核心技术已申请相关专利保护
+- **合规认证**: 通过ISO27001等安全认证
 
 ---
 
-## ℹ️ 重要说明 | Important Notes
+## 🌟 重要说明
 
-1. **开源承诺**: StreamVault Pro 核心功能将始终保持开源免费
-2. **服务选择**: 商业化服务完全可选，不影响开源版本使用
-3. **社区优先**: 我们优先考虑开源社区的需求和发展
-4. **透明定价**: 所有商业服务价格公开透明
-5. **质量保证**: 提供专业、高质量的商业化服务
+### 开源承诺
+- ✅ **核心承诺**: StreamVault Pro致力于为用户提供专业级的直播录制解决方案
+- ✅ **服务可选**: 所有商业化服务均为可选项目，不影响软件核心功能使用
+- ✅ **社区优先**: 优先考虑用户需求和社区反馈，持续改进产品
+- ✅ **透明定价**: 所有价格公开透明，无隐藏费用
+- ✅ **质量保证**: 承诺提供高质量的产品和服务
+
+### 联系我们
+如有任何关于商业化服务的问题，欢迎随时联系我们的商务团队。我们将为您提供最适合的解决方案。
 
 ---
 
-<div align="center">
-  <strong>开源免费 + 可选商业服务 = 灵活的解决方案</strong><br>
-  <strong>Open Source Free + Optional Commercial Services = Flexible Solutions</strong>
-</div> 
+**© 2024 StreamVault Pro. All Rights Reserved.** 
